@@ -1,160 +1,124 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warframe Activity Tracker - Fixed</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; line-height: 1.4; }
-        .header { background: #0a0a0a; border-bottom: 2px solid #1a1a1a; padding: 14px 16px; position: sticky; top: 0; z-index: 100; }
-        .header-content { max-width: 1200px; margin: 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
-        .title { font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
-        .search-bar { display: flex; gap: 8px; align-items: center; width: 100%; max-width: 740px; }
-        .search-input { flex: 1; padding: 12px 14px; background: #121212; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 0.95rem; min-width: 0; }
-        .search-input:focus { outline: none; border-color: #4a90e2; }
-        .controls { display: flex; gap: 8px; align-items: center; }
-        .btn { padding: 10px 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
-        .btn:active { transform: translateY(1px); }
-        .container { max-width: 1200px; margin: 18px auto; padding: 0 12px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-        .card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px; }
-        .card-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-        .card-title { font-weight:700; font-size:1rem; }
-        .content-box { background: #000; padding: 12px; border-radius: 8px; border: 1px solid #1a1a1a; margin-bottom: 10px; }
-        .scrollable { max-height: 420px; overflow-y: auto; }
-        .scrollable::-webkit-scrollbar { width: 8px; }
-        .scrollable::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        .tier-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
-        .tier-btn { padding:8px 12px; background:#1a1a1a; border:1px solid #333; border-radius:6px; color:#aaa; cursor:pointer; }
-        .tier-btn.active { background:#fff; color:#000; border-color:#fff; }
-        .badge { display:inline-block; padding:4px 8px; border-radius:4px; font-size:0.72rem; font-weight:700; margin-right:6px; text-transform:uppercase; }
-        .badge.storm { background:#4a90e2; color:#fff; }
-        .badge.steel { background:#dc2626; color:#fff; }
-        .time-remaining { color:#4a90e2; font-weight:600; }
-        .label { color:#8b8b8b; font-size:0.85rem; margin-bottom:4px; }
-        .value { color:#fff; font-weight:600; font-size:1rem; }
-        .green { color:#10b981; }
-        .red { color:#dc2626; }
-        .blue { color:#4a90e2; }
-        .info-note { background:#111; border-left:3px solid #4a90e2; padding:10px; margin-top:10px; font-size:0.85rem; color:#aaa; }
-        .weapon-item { background:#0f0f0f; padding:8px; border-radius:6px; display:flex; align-items:center; gap:10px; margin-bottom:8px; border:1px solid #222; }
-        .weapon-number { width:28px; height:28px; background:#222; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; }
-        .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:120px; font-size:1rem; gap:12px; }
-        .error { text-align:center; padding:20px; color:#dc2626; }
-        @media (max-width: 640px) { .header-content { flex-direction: column; align-items: stretch; gap:10px; } .title { font-size:1rem; } .search-bar { width:100%; } .controls { justify-content: flex-end; } .container { margin: 12px auto; } }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Warframe Tracker — Node Proxy</title>
+<style>
+  body{font-family:Inter,system-ui,Arial;background:#050507;color:#eaeaea;margin:0}
+  header{padding:12px;background:#0b0d10;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  header h1{margin:0;font-size:1rem}
+  input{padding:8px;border-radius:6px;border:1px solid #222;background:#0b0d10;color:#eaeaea;min-width:220px}
+  button{padding:8px 10px;border-radius:6px;border:none;background:#1f6feb;color:white;cursor:pointer}
+  .container{padding:12px;max-width:1100px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .card{background:#0c0e11;padding:12px;border-radius:8px;border:1px solid #16181c}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:0.85rem}
+  .muted{color:#9aa0b4;font-size:0.9rem}
+  @media (max-width:640px){header{padding:10px} .container{padding:8px}}
+</style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <div class="title">⚡ WARFRAME TRACKER</div>
-            <div style="flex:1; display:flex; justify-content:flex-end;">
-                <div class="search-bar">
-                    <input id="searchInput" class="search-input" type="text" placeholder="Search activities, missions, rewards... (press Enter)" />
-                    <div class="controls">
-                        <button id="searchBtn" class="btn">🔎</button>
-                        <button id="refreshBtn" class="btn">🔄 Refresh</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="container"><div id="app"></div></div>
-    <script>
-        const API_BASE = 'https://api.warframestat.us/pc';
-        let selectedTier = 'all';
-        let gameData = null;
-        let searchQuery = '';
-        let searchResults = null;
+<header>
+  <h1>Warframe Tracker (Node proxy)</h1>
+  <div style="flex:1"></div>
+  <input id="q" placeholder="Search (e.g. arbitration, Baro, fissures)"/>
+  <button id="search">Search</button>
+  <button id="refresh">Refresh</button>
+</header>
 
-        const searchInput = document.getElementById('searchInput');
-        document.getElementById('searchBtn').addEventListener('click', () => doSearch());
-        document.getElementById('refreshBtn').addEventListener('click', () => fetchData());
-        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
-        searchInput.addEventListener('input', (e) => { searchQuery = e.target.value.trim(); render(); });
+<div class="container">
+  <div id="status" class="muted">Ready.</div>
+  <div id="grid" class="grid" style="margin-top:12px"></div>
+</div>
 
-        function formatTimeRemaining(expiry) {
-            if (!expiry) return 'Unknown';
-            const diff = new Date(expiry) - new Date();
-            if (diff <= 0) return 'Expired';
-            const days = Math.floor(diff / (1000*60*60*24));
-            const hours = Math.floor((diff % (1000*60*60*24))/(1000*60*60));
-            const minutes = Math.floor((diff % (1000*60*60))/(1000*60));
-            return days>0? `${days}d ${hours}h ${minutes}m` : hours>0? `${hours}h ${minutes}m` : `${minutes}m`;
-        }
+<script>
+const grid = document.getElementById('grid');
+const status = document.getElementById('status');
+const qInput = document.getElementById('q');
 
-        async function fetchData() {
-            document.getElementById('app').innerHTML = '<div class="loading">Loading Warframe Data...</div>';
-            try {
-                const [fissures, invasions, sortie, voidTrader, archonHunt, cetusCycle, vallisCycle, cambionCycle, earthCycle, alerts, events] = await Promise.all([
-                    fetch(`${API_BASE}/fissures`).then(r=>r.json()).catch(()=>[]),
-                    fetch(`${API_BASE}/invasions`).then(r=>r.json()).catch(()=>[]),
-                    fetch(`${API_BASE}/sortie`).then(r=>r.json()).catch(()=>null),
-                    fetch(`${API_BASE}/voidTrader`).then(r=>r.json()).catch(()=>null),
-                    fetch(`${API_BASE}/archonHunt`).then(r=>r.json()).catch(()=>null),
-                    fetch(`${API_BASE}/cetusCycle`).then(r=>r.json()).catch(()=>null),
-                    fetch(`${API_BASE}/vallisCycle`).then(r=>r.json()).catch(()=>null),
-                    fetch(`${API_BASE}/cambionCycle`).then(r=>r.json()).catch(()=>null),
-                    fetch(`${API_BASE}/earthCycle`).then(r=>r.json()).catch(()=>null),
-                    fetch(`${API_BASE}/alerts`).then(r=>r.json()).catch(()=>[]),
-                    fetch(`${API_BASE}/events`).then(r=>r.json()).catch(()=>[])
-                ]);
+function setStatus(t){ status.textContent = t; }
 
-                gameData = {fissures, invasions, sortie, voidTrader, archonHunt, cetusCycle, vallisCycle, cambionCycle, earthCycle, alerts, events};
-                searchResults = null;
-                render();
-            } catch (err) {
-                console.error(err);
-                document.getElementById('app').innerHTML = `<div class="error"><div>⚠️ Error Loading Data</div><div style="color:#bbb; margin-top:10px;">${err.message}</div><div style="margin-top:12px;"><button class='btn' onclick='fetchData()'>🔄 Try Again</button></div></div>`;
-            }
-        }
+function card(title, html){ return `<div class="card"><strong>${title}</strong><div style="margin-top:10px">${html}</div></div>`; }
 
-        function render() {
-            if (!gameData) return;
-            const parts = [];
-            parts.push(renderCycles());
+async function fetchApi(path){
+  const res = await fetch(`/api/${path}`);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
 
-            const filteredFissures = gameData.fissures.filter(f=>(selectedTier==='all'||f.tier.toLowerCase()===selectedTier.toLowerCase()) && (searchQuery===''||(`${f.node} ${f.missionType} ${f.tier} ${f.enemy}`).toLowerCase().includes(searchQuery.toLowerCase())));
-            if (filteredFissures.length) parts.push(renderVoidFissures(filteredFissures));
+function renderJsonAsSummary(obj){
+  // small readable summary: show some keys, else full JSON
+  try{
+    if(!obj) return '<div class="muted">None</div>';
+    if(Array.isArray(obj) && obj.length === 0) return '<div class="muted">None</div>';
+    if(typeof obj === 'object'){
+      // if it's a fissures list, show first 6
+      if(Array.isArray(obj)){
+        const sample = obj.slice(0,6).map(i=>`<div class="muted">${i.tier || ''} ${i.missionType || ''} · ${i.node || ''}</div>`).join('');
+        return sample + (obj.length>6?`<div class="muted">+ ${obj.length-6} more</div>` : '');
+      }
+      // small object: pretty-print some fields
+      return `<pre>${JSON.stringify(obj,null,2)}</pre>`;
+    }
+    return `<div>${String(obj)}</div>`;
+  }catch(e){
+    return `<pre>${escapeHtml(String(obj))}</pre>`;
+  }
+}
 
-            if (gameData.sortie) parts.push(renderSortie());
-            if (gameData.archonHunt && gameData.archonHunt.boss) parts.push(renderArchonHunt());
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-            const activeInvasions = gameData.invasions.filter(inv=>!inv.completed&&(searchQuery===''||(`${inv.node} ${inv.attackingFaction} ${inv.defendingFaction}`).toLowerCase().includes(searchQuery.toLowerCase())));
-            if (activeInvasions.length) parts.push(renderInvasions(activeInvasions));
+async function loadDashboard(){
+  setStatus('Loading dashboard...');
+  grid.innerHTML = '';
+  try{
+    const [fissures, alerts, invasions, sortie, voidTrader] = await Promise.all([
+      fetchApi('fissures').catch(()=>[]),
+      fetchApi('alerts').catch(()=>[]),
+      fetchApi('invasions').catch(()=>[]),
+      fetchApi('sortie').catch(()=>null),
+      fetchApi('voidTrader').catch(()=>null)
+    ]);
+    grid.insertAdjacentHTML('beforeend', card('Fissures', renderJsonAsSummary(fissures)));
+    grid.insertAdjacentHTML('beforeend', card('Alerts', renderJsonAsSummary(alerts)));
+    grid.insertAdjacentHTML('beforeend', card('Invasions', renderJsonAsSummary(invasions)));
+    grid.insertAdjacentHTML('beforeend', card('Sortie', renderJsonAsSummary(sortie)));
+    grid.insertAdjacentHTML('beforeend', card('Baro (Void Trader)', renderJsonAsSummary(voidTrader)));
+    setStatus('Dashboard loaded');
+  }catch(err){
+    setStatus('Dashboard error: ' + err.message);
+    grid.innerHTML = `<div class="card"><pre>${escapeHtml(err.stack || err.message)}</pre></div>`;
+  }
+}
 
-            const currentWeek = getCurrentIncarnonWeek();
-            if (currentWeek) parts.push(renderIncarnonRotation(currentWeek));
+async function doSearch(){
+  const q = qInput.value.trim();
+  if(!q){ setStatus('Type something to search'); return; }
+  setStatus('Searching remote API...');
+  grid.innerHTML = '';
+  try{
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json());
+    setStatus(`Search done — matches: ${Object.keys(res.matches||{}).length}`);
+    const matches = res.matches || {};
+    if(Object.keys(matches).length === 0){
+      grid.innerHTML = `<div class="card"><div class="muted">No results for "${escapeHtml(q)}"</div></div>`;
+      return;
+    }
+    for(const [k,v] of Object.entries(matches)){
+      grid.insertAdjacentHTML('beforeend', card(k, `<pre>${escapeHtml(JSON.stringify(v,null,2))}</pre>`));
+    }
+  }catch(err){
+    setStatus('Search failed: ' + err.message);
+    grid.innerHTML = `<div class="card"><pre>${escapeHtml(err.stack || err.message)}</pre></div>`;
+  }
+}
 
-            if (gameData.voidTrader) parts.push(renderVoidTrader());
+document.getElementById('search').addEventListener('click', ()=>doSearch());
+qInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+document.getElementById('refresh').addEventListener('click', ()=>loadDashboard());
 
-            const filteredAlerts = gameData.alerts.filter(a=>searchQuery===''||(`${a.mission.node} ${a.mission.type} ${a.mission.faction}`).toLowerCase().includes(searchQuery.toLowerCase()));
-            if (filteredAlerts.length) parts.push(renderAlerts(filteredAlerts));
-
-            const filteredEvents = gameData.events.filter(e=>searchQuery===''||(e.description&&e.description.toLowerCase().includes(searchQuery.toLowerCase())));
-            if (filteredEvents.length) parts.push(renderEvents(filteredEvents));
-
-            if (searchResults) parts.unshift(renderSearchResults(searchResults));
-            document.getElementById('app').innerHTML = `<div class="grid">${parts.join('')}</div>`;
-            attachEventListeners();
-        }
-
-        function attachEventListeners() { document.querySelectorAll('.tier-btn').forEach(btn=>btn.addEventListener('click',()=>{selectedTier=btn.dataset.tier;render();})); }
-
-        function getCurrentIncarnonWeek() {
-            const startDate = new Date('2024-10-07T00:00:00Z');
-            const now = new Date();
-            const diffWeeks = Math.floor((now-startDate)/(1000*60*60*24*7));
-            const currentWeek = (diffWeeks%8)+1;
-            const rotation = [{week:1,weapons:['Braton','Lato','Skana','Paris','Kunai']},{week:2,weapons:['Boar','Gammacor','Angstrum','Gorgon','Anku']},{week:3,weapons:['Bo','Latron','Furis','Furax','Strun']},{week:4,weapons:['Lex','Magistar','Boltor','Bronco','Ceramic Dagger']},{week:5,weapons:['Torid','Dual Toxocyst','Dual Ichor','Miter']},{week:6,weapons:['Ack & Brunt','Soma','Vasto','Nami Solo','Burston']},{week:7,weapons:['Zylok','Sibear','Dread','Despair','Hate']},{week:8,weapons:['Dera','Sybaris','Cestra','Sicarus','Okina']}];
-            return rotation.find(r=>r.week===currentWeek);
-        }
-
-        // The render functions like renderCycles, renderVoidFissures, renderSortie, renderArchonHunt, renderInvasions, renderIncarnonRotation, renderVoidTrader, renderAlerts, renderEvents, renderSearchResults remain the same as previously, just removed local arbitration rendering.
-
-        fetchData();
-    </script>
+loadDashboard();
+</script>
 </body>
 </html>
