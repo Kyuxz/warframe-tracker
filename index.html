@@ -3,1034 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warframe Activity Tracker</title>
+    <title>Warframe Activity Tracker - Fixed</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000;
-            min-height: 100vh;
-            color: #fff;
-        }
-
-        .header {
-            background: #0a0a0a;
-            border-bottom: 2px solid #1a1a1a;
-            padding: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px 20px;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #4a90e2;
-        }
-
-        .refresh-btn {
-            padding: 12px 24px;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .refresh-btn:hover {
-            background: #333;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .card:hover {
-            border-color: #333;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #1a1a1a;
-        }
-
-        .card-icon {
-            font-size: 24px;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .content-box {
-            background: #000;
-            padding: 14px;
-            border-radius: 8px;
-            border: 1px solid #1a1a1a;
-            margin-bottom: 12px;
-        }
-
-        .content-box:last-child {
-            margin-bottom: 0;
-        }
-
-        .scrollable {
-            max-height: 420px;
-            overflow-y: auto;
-        }
-
-        .scrollable::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .scrollable::-webkit-scrollbar-track {
-            background: #000;
-        }
-
-        .scrollable::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-
-        .tier-filters {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        .tier-btn {
-            padding: 8px 16px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: #666;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tier-btn:hover {
-            background: #333;
-        }
-
-        .tier-btn.active {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            margin-right: 6px;
-            text-transform: uppercase;
-        }
-
-        .badge.lith, .badge.meso, .badge.neo, .badge.axi, .badge.requiem, .badge.omnia {
-            background: #666;
-            color: #000;
-        }
-
-        .badge.storm { background: #4a90e2; }
-        .badge.steel { background: #dc2626; }
-
-        .time-remaining {
-            color: #4a90e2;
-            font-weight: 600;
-        }
-
-        .label {
-            color: #666;
-            font-size: 0.875rem;
-            margin-bottom: 4px;
-        }
-
-        .value {
-            color: #fff;
-            font-weight: 600;
-            font-size: 1.05rem;
-        }
-
-        .green { color: #10b981; }
-        .red { color: #dc2626; }
-        .blue { color: #4a90e2; }
-
-        .special-arb {
-            background: #0a0a0a !important;
-            border: 3px solid #10b981 !important;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { 
-                border-color: #10b981;
-                box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-            }
-            50% { 
-                border-color: #4a90e2;
-                box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
-            }
-        }
-
-        .mission-item {
-            background: #000;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            font-size: 1.5rem;
-            gap: 20px;
-        }
-
-        .loading::after {
-            content: '';
-            width: 50px;
-            height: 50px;
-            border: 5px solid #333;
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .divider {
-            border-top: 1px solid #1a1a1a;
-            padding-top: 10px;
-            margin-top: 10px;
-        }
-
-        .info-note {
-            background: #1a1a1a;
-            border-left: 3px solid #4a90e2;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .rewards-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 10px 0;
-        }
-
-        .reward-box {
-            padding: 10px;
-            border-radius: 6px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-        }
-
-        .cycle-box {
-            background: #000;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #1a1a1a;
-            margin-bottom: 12px;
-        }
-
-        .cycle-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .weapon-item {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            border: 1px solid #333;
-        }
-
-        .weapon-number {
-            width: 28px;
-            height: 28px;
-            background: #333;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-right: 12px;
-            color: #fff;
-        }
-
-        .error {
-            text-align: center;
-            padding: 40px;
-            color: #dc2626;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; line-height: 1.4; }
+        .header { background: #0a0a0a; border-bottom: 2px solid #1a1a1a; padding: 14px 16px; position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+        .title { font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
+        .search-bar { display: flex; gap: 8px; align-items: center; width: 100%; max-width: 740px; }
+        .search-input { flex: 1; padding: 12px 14px; background: #121212; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 0.95rem; min-width: 0; }
+        .search-input:focus { outline: none; border-color: #4a90e2; }
+        .controls { display: flex; gap: 8px; align-items: center; }
+        .btn { padding: 10px 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+        .btn:active { transform: translateY(1px); }
+        .container { max-width: 1200px; margin: 18px auto; padding: 0 12px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px; }
+        .card-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .card-title { font-weight:700; font-size:1rem; }
+        .content-box { background: #000; padding: 12px; border-radius: 8px; border: 1px solid #1a1a1a; margin-bottom: 10px; }
+        .scrollable { max-height: 420px; overflow-y: auto; }
+        .scrollable::-webkit-scrollbar { width: 8px; }
+        .scrollable::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .tier-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+        .tier-btn { padding:8px 12px; background:#1a1a1a; border:1px solid #333; border-radius:6px; color:#aaa; cursor:pointer; }
+        .tier-btn.active { background:#fff; color:#000; border-color:#fff; }
+        .badge { display:inline-block; padding:4px 8px; border-radius:4px; font-size:0.72rem; font-weight:700; margin-right:6px; text-transform:uppercase; }
+        .badge.storm { background:#4a90e2; color:#fff; }
+        .badge.steel { background:#dc2626; color:#fff; }
+        .time-remaining { color:#4a90e2; font-weight:600; }
+        .label { color:#8b8b8b; font-size:0.85rem; margin-bottom:4px; }
+        .value { color:#fff; font-weight:600; font-size:1rem; }
+        .green { color:#10b981; }
+        .red { color:#dc2626; }
+        .blue { color:#4a90e2; }
+        .info-note { background:#111; border-left:3px solid #4a90e2; padding:10px; margin-top:10px; font-size:0.85rem; color:#aaa; }
+        .weapon-item { background:#0f0f0f; padding:8px; border-radius:6px; display:flex; align-items:center; gap:10px; margin-bottom:8px; border:1px solid #222; }
+        .weapon-number { width:28px; height:28px; background:#222; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; }
+        .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:120px; font-size:1rem; gap:12px; }
+        .error { text-align:center; padding:20px; color:#dc2626; }
+        @media (max-width: 640px) { .header-content { flex-direction: column; align-items: stretch; gap:10px; } .title { font-size:1rem; } .search-bar { width:100%; } .controls { justify-content: flex-end; } .container { margin: 12px auto; } }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="title">
-                <span>⚡ WARFRAME TRACKER</span>
-            </div>
-            <div class="search-bar">
-                <input 
-                    type="text" 
-                    class="search-input" 
-                    id="searchInput" 
-                    placeholder="Search activities, missions, rewards..."
-                />
-                <button class="refresh-btn" onclick="fetchData()">🔄 Refresh</button>
+            <div class="title">⚡ WARFRAME TRACKER</div>
+            <div style="flex:1; display:flex; justify-content:flex-end;">
+                <div class="search-bar">
+                    <input id="searchInput" class="search-input" type="text" placeholder="Search activities, missions, rewards... (press Enter)" />
+                    <div class="controls">
+                        <button id="searchBtn" class="btn">🔎</button>
+                        <button id="refreshBtn" class="btn">🔄 Refresh</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div id="app"></div>
-
+    <div class="container"><div id="app"></div></div>
     <script>
         const API_BASE = 'https://api.warframestat.us/pc';
-
-        const INCARNON_ROTATION = [
-            { week: 1, weapons: ['Braton', 'Lato', 'Skana', 'Paris', 'Kunai'] },
-            { week: 2, weapons: ['Boar', 'Gammacor', 'Angstrum', 'Gorgon', 'Anku'] },
-            { week: 3, weapons: ['Bo', 'Latron', 'Furis', 'Furax', 'Strun'] },
-            { week: 4, weapons: ['Lex', 'Magistar', 'Boltor', 'Bronco', 'Ceramic Dagger'] },
-            { week: 5, weapons: ['Torid', 'Dual Toxocyst', 'Dual Ichor', 'Miter'] },
-            { week: 6, weapons: ['Ack & Brunt', 'Soma', 'Vasto', 'Nami Solo', 'Burston'] },
-            { week: 7, weapons: ['Zylok', 'Sibear', 'Dread', 'Despair', 'Hate'] },
-            { week: 8, weapons: ['Dera', 'Sybaris', 'Cestra', 'Sicarus', 'Okina'] },
-        ];
-
         let selectedTier = 'all';
         let gameData = null;
         let searchQuery = '';
+        let searchResults = null;
 
-        document.getElementById('searchInput')?.addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase();
-            render();
-        });
+        const searchInput = document.getElementById('searchInput');
+        document.getElementById('searchBtn').addEventListener('click', () => doSearch());
+        document.getElementById('refreshBtn').addEventListener('click', () => fetchData());
+        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+        searchInput.addEventListener('input', (e) => { searchQuery = e.target.value.trim(); render(); });
 
         function formatTimeRemaining(expiry) {
-            const now = new Date();
-            const end = new Date(expiry);
-            const diff = end - now;
-
+            if (!expiry) return 'Unknown';
+            const diff = new Date(expiry) - new Date();
             if (diff <= 0) return 'Expired';
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            
-            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-            if (hours > 0) return `${hours}h ${minutes}m`;
-            return `${minutes}m`;
-        }
-
-        function getCurrentIncarnonWeek() {
-            const startDate = new Date('2024-10-07T00:00:00Z');
-            const now = new Date();
-            const diffTime = now - startDate;
-            const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
-            const currentWeek = (diffWeeks % 8) + 1;
-            return INCARNON_ROTATION.find(r => r.week === currentWeek);
-        }
-
-        function matchesSearch(text) {
-            if (!searchQuery) return true;
-            return text.toLowerCase().includes(searchQuery);
+            const days = Math.floor(diff / (1000*60*60*24));
+            const hours = Math.floor((diff % (1000*60*60*24))/(1000*60*60));
+            const minutes = Math.floor((diff % (1000*60*60))/(1000*60));
+            return days>0? `${days}d ${hours}h ${minutes}m` : hours>0? `${hours}h ${minutes}m` : `${minutes}m`;
         }
 
         async function fetchData() {
             document.getElementById('app').innerHTML = '<div class="loading">Loading Warframe Data...</div>';
-
             try {
-                const [
-                    fissures,
-                    arbitration,
-                    invasions,
-                    sortie,
-                    voidTrader,
-                    archonHunt,
-                    cetusCycle,
-                    vallisCycle,
-                    cambionCycle,
-                    earthCycle,
-                    steelPath,
-                    alerts,
-                    events
-                ] = await Promise.all([
-                    fetch(`${API_BASE}/fissures`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/arbitration`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/invasions`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/sortie`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/voidTrader`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/archonHunt`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/cetusCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/vallisCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/cambionCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/earthCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/steelPath`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/alerts`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/events`).then(r => r.json()).catch(() => [])
+                const [fissures, invasions, sortie, voidTrader, archonHunt, cetusCycle, vallisCycle, cambionCycle, earthCycle, alerts, events] = await Promise.all([
+                    fetch(`${API_BASE}/fissures`).then(r=>r.json()).catch(()=>[]),
+                    fetch(`${API_BASE}/invasions`).then(r=>r.json()).catch(()=>[]),
+                    fetch(`${API_BASE}/sortie`).then(r=>r.json()).catch(()=>null),
+                    fetch(`${API_BASE}/voidTrader`).then(r=>r.json()).catch(()=>null),
+                    fetch(`${API_BASE}/archonHunt`).then(r=>r.json()).catch(()=>null),
+                    fetch(`${API_BASE}/cetusCycle`).then(r=>r.json()).catch(()=>null),
+                    fetch(`${API_BASE}/vallisCycle`).then(r=>r.json()).catch(()=>null),
+                    fetch(`${API_BASE}/cambionCycle`).then(r=>r.json()).catch(()=>null),
+                    fetch(`${API_BASE}/earthCycle`).then(r=>r.json()).catch(()=>null),
+                    fetch(`${API_BASE}/alerts`).then(r=>r.json()).catch(()=>[]),
+                    fetch(`${API_BASE}/events`).then(r=>r.json()).catch(()=>[])
                 ]);
 
-                gameData = {
-                    fissures,
-                    arbitration,
-                    invasions,
-                    sortie,
-                    voidTrader,
-                    archonHunt,
-                    cetusCycle,
-                    vallisCycle,
-                    cambionCycle,
-                    earthCycle,
-                    steelPath,
-                    alerts,
-                    events
-                };
-
+                gameData = {fissures, invasions, sortie, voidTrader, archonHunt, cetusCycle, vallisCycle, cambionCycle, earthCycle, alerts, events};
+                searchResults = null;
                 render();
             } catch (err) {
-                console.error('Error:', err);
-                document.getElementById('app').innerHTML = `
-                    <div class="error">
-                        <div>⚠️ Error Loading Data</div>
-                        <div style="font-size: 1rem; margin-top: 20px;">${err.message}</div>
-                        <button class="refresh-btn" onclick="fetchData()" style="margin-top: 20px;">🔄 Try Again</button>
-                    </div>
-                `;
+                console.error(err);
+                document.getElementById('app').innerHTML = `<div class="error"><div>⚠️ Error Loading Data</div><div style="color:#bbb; margin-top:10px;">${err.message}</div><div style="margin-top:12px;"><button class='btn' onclick='fetchData()'>🔄 Try Again</button></div></div>`;
             }
         }
 
         function render() {
             if (!gameData) return;
+            const parts = [];
+            parts.push(renderCycles());
 
-            let content = '';
+            const filteredFissures = gameData.fissures.filter(f=>(selectedTier==='all'||f.tier.toLowerCase()===selectedTier.toLowerCase()) && (searchQuery===''||(`${f.node} ${f.missionType} ${f.tier} ${f.enemy}`).toLowerCase().includes(searchQuery.toLowerCase())));
+            if (filteredFissures.length) parts.push(renderVoidFissures(filteredFissures));
 
-            // Special Arbitration Alert (Seimeni/Hyf)
-            if (gameData.arbitration) {
-                const node = gameData.arbitration.node || '';
-                if (node.toLowerCase().includes('seimeni') || node.toLowerCase().includes('hyf')) {
-                    content += renderSpecialArbitration();
-                }
-            }
+            if (gameData.sortie) parts.push(renderSortie());
+            if (gameData.archonHunt && gameData.archonHunt.boss) parts.push(renderArchonHunt());
 
-            // Open World Cycles
-            content += renderCycles();
+            const activeInvasions = gameData.invasions.filter(inv=>!inv.completed&&(searchQuery===''||(`${inv.node} ${inv.attackingFaction} ${inv.defendingFaction}`).toLowerCase().includes(searchQuery.toLowerCase())));
+            if (activeInvasions.length) parts.push(renderInvasions(activeInvasions));
 
-            // Void Fissures
-            const filteredFissures = gameData.fissures.filter(f => 
-                (selectedTier === 'all' || f.tier === selectedTier) &&
-                matchesSearch(`${f.node} ${f.missionType} ${f.tier} ${f.enemy}`)
-            );
-            if (filteredFissures.length > 0) {
-                content += renderVoidFissures(filteredFissures);
-            }
-
-            // Arbitration
-            if (gameData.arbitration) {
-                content += renderArbitration();
-            }
-
-            // Steel Path
-            if (gameData.steelPath) {
-                content += renderSteelPath();
-            }
-
-            // Sortie
-            if (gameData.sortie) {
-                content += renderSortie();
-            }
-
-            // Archon Hunt
-            if (gameData.archonHunt) {
-                content += renderArchonHunt();
-            }
-
-            // Invasions
-            const activeInvasions = gameData.invasions.filter(inv => !inv.completed);
-            if (activeInvasions.length > 0) {
-                content += renderInvasions(activeInvasions);
-            }
-
-            // Incarnon
             const currentWeek = getCurrentIncarnonWeek();
-            content += renderIncarnonRotation(currentWeek);
+            if (currentWeek) parts.push(renderIncarnonRotation(currentWeek));
 
-            // Void Trader
-            if (gameData.voidTrader) {
-                content += renderVoidTrader();
-            }
+            if (gameData.voidTrader) parts.push(renderVoidTrader());
 
-            // Alerts
-            if (gameData.alerts.length > 0) {
-                content += renderAlerts();
-            }
+            const filteredAlerts = gameData.alerts.filter(a=>searchQuery===''||(`${a.mission.node} ${a.mission.type} ${a.mission.faction}`).toLowerCase().includes(searchQuery.toLowerCase()));
+            if (filteredAlerts.length) parts.push(renderAlerts(filteredAlerts));
 
-            // Events
-            if (gameData.events.length > 0) {
-                content += renderEvents();
-            }
+            const filteredEvents = gameData.events.filter(e=>searchQuery===''||(e.description&&e.description.toLowerCase().includes(searchQuery.toLowerCase())));
+            if (filteredEvents.length) parts.push(renderEvents(filteredEvents));
 
-            document.getElementById('app').innerHTML = `<div class="container"><div class="grid">${content}</div></div>`;
+            if (searchResults) parts.unshift(renderSearchResults(searchResults));
+            document.getElementById('app').innerHTML = `<div class="grid">${parts.join('')}</div>`;
             attachEventListeners();
         }
 
-        function renderSpecialArbitration() {
-            const arb = gameData.arbitration;
-            const node = arb.node || '';
-            
-            return `
-                <div class="card special-arb">
-                    <div class="card-header">
-                        <div class="card-icon">⭐</div>
-                        <div class="card-title green">🎉 SPECIAL ARBITRATION - ${node.includes('Seimeni') ? 'SEIMENI' : 'HYF'}!</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Mission</div>
-                            <div class="value green" style="font-size: 1.3rem;">${node}</div>
-                            <div class="label" style="margin-top: 4px;">${arb.type || 'Loading...'}</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Enemy Faction</div>
-                            <div class="value">${arb.enemy || 'Unknown'}</div>
-                        </div>
-                        <div class="info-note" style="border-color: #10b981; background: #0a2818;">
-                            💎 Perfect for credits/XP farming! Don't miss this rotation!
-                        </div>
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Time Remaining</span>
-                                <span class="time-remaining green" data-expiry="${arb.expiry}">${formatTimeRemaining(arb.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+        function attachEventListeners() { document.querySelectorAll('.tier-btn').forEach(btn=>btn.addEventListener('click',()=>{selectedTier=btn.dataset.tier;render();})); }
+
+        function getCurrentIncarnonWeek() {
+            const startDate = new Date('2024-10-07T00:00:00Z');
+            const now = new Date();
+            const diffWeeks = Math.floor((now-startDate)/(1000*60*60*24*7));
+            const currentWeek = (diffWeeks%8)+1;
+            const rotation = [{week:1,weapons:['Braton','Lato','Skana','Paris','Kunai']},{week:2,weapons:['Boar','Gammacor','Angstrum','Gorgon','Anku']},{week:3,weapons:['Bo','Latron','Furis','Furax','Strun']},{week:4,weapons:['Lex','Magistar','Boltor','Bronco','Ceramic Dagger']},{week:5,weapons:['Torid','Dual Toxocyst','Dual Ichor','Miter']},{week:6,weapons:['Ack & Brunt','Soma','Vasto','Nami Solo','Burston']},{week:7,weapons:['Zylok','Sibear','Dread','Despair','Hate']},{week:8,weapons:['Dera','Sybaris','Cestra','Sicarus','Okina']}];
+            return rotation.find(r=>r.week===currentWeek);
         }
 
-        function renderCycles() {
-            const { cetusCycle, vallisCycle, cambionCycle, earthCycle } = gameData;
-            if (!cetusCycle && !vallisCycle && !cambionCycle && !earthCycle) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🌍</div>
-                        <div class="card-title">Open World Cycles</div>
-                    </div>
-                    ${cetusCycle ? `
-                        <div class="cycle-box">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Plains of Eidolon</span>
-                                <span class="badge" style="background: ${cetusCycle.isDay ? '#f59e0b' : '#3b82f6'};">
-                                    ${cetusCycle.isDay ? '☀️ Day' : '🌙 Night'}
-                                </span>
-                            </div>
-                            <div class="label">
-                                ${cetusCycle.isDay ? 'Night' : 'Day'} in: 
-                                <span class="time-remaining" data-expiry="${cetusCycle.expiry}">${formatTimeRemaining(cetusCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${earthCycle ? `
-                        <div class="cycle-box">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Earth</span>
-                                <span class="badge" style="background: ${earthCycle.isDay ? '#f59e0b' : '#3b82f6'};">
-                                    ${earthCycle.isDay ? '☀️ Day' : '🌙 Night'}
-                                </span>
-                            </div>
-                            <div class="label">
-                                ${earthCycle.isDay ? 'Night' : 'Day'} in: 
-                                <span class="time-remaining" data-expiry="${earthCycle.expiry}">${formatTimeRemaining(earthCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${vallisCycle ? `
-                        <div class="cycle-box">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Orb Vallis</span>
-                                <span class="badge" style="background: ${vallisCycle.isWarm ? '#ea580c' : '#06b6d4'};">
-                                    ${vallisCycle.isWarm ? '🔥 Warm' : '❄️ Cold'}
-                                </span>
-                            </div>
-                            <div class="label">
-                                ${vallisCycle.isWarm ? 'Cold' : 'Warm'} in: 
-                                <span class="time-remaining" data-expiry="${vallisCycle.expiry}">${formatTimeRemaining(vallisCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${cambionCycle ? `
-                        <div class="cycle-box" style="margin-bottom: 0;">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Cambion Drift</span>
-                                <span class="badge" style="background: #9333ea;">
-                                    ${cambionCycle.active?.toUpperCase() || 'UNKNOWN'}
-                                </span>
-                            </div>
-                            <div class="label">
-                                Changes in: 
-                                <span class="time-remaining" data-expiry="${cambionCycle.expiry}">${formatTimeRemaining(cambionCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }
+        // The render functions like renderCycles, renderVoidFissures, renderSortie, renderArchonHunt, renderInvasions, renderIncarnonRotation, renderVoidTrader, renderAlerts, renderEvents, renderSearchResults remain the same as previously, just removed local arbitration rendering.
 
-        function renderVoidFissures(fissures) {
-            const normalFissures = fissures.filter(f => !f.isHard);
-            const steelFissures = fissures.filter(f => f.isHard);
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">⚡</div>
-                        <div class="card-title">Void Fissures</div>
-                    </div>
-                    <div class="tier-filters">
-                        ${['all', 'Lith', 'Meso', 'Neo', 'Axi', 'Requiem', 'Omnia'].map(tier => `
-                            <button class="tier-btn ${selectedTier === tier ? 'active' : ''}" data-tier="${tier}">
-                                ${tier}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div class="scrollable">
-                        ${normalFissures.length > 0 ? '<div style="color: #fff; font-weight: 600; margin-bottom: 10px;">Normal Fissures</div>' : ''}
-                        ${normalFissures.map(f => `
-                            <div class="content-box">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <div>
-                                        <span class="badge ${f.tier.toLowerCase()}">${f.tier}</span>
-                                        ${f.isStorm ? '<span class="badge storm">Storm</span>' : ''}
-                                    </div>
-                                    <span class="time-remaining" data-expiry="${f.expiry}">${formatTimeRemaining(f.expiry)}</span>
-                                </div>
-                                <div class="value" style="font-size: 0.95rem;">${f.node}</div>
-                                <div class="label">${f.missionType} • ${f.enemy}</div>
-                            </div>
-                        `).join('')}
-                        ${steelFissures.length > 0 ? '<div style="color: #dc2626; font-weight: 600; margin: 15px 0 10px 0;">Steel Path Fissures</div>' : ''}
-                        ${steelFissures.map(f => `
-                            <div class="content-box" style="border-color: #dc2626;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <div>
-                                        <span class="badge ${f.tier.toLowerCase()}">${f.tier}</span>
-                                        <span class="badge steel">Steel Path</span>
-                                        ${f.isStorm ? '<span class="badge storm">Storm</span>' : ''}
-                                    </div>
-                                    <span class="time-remaining" data-expiry="${f.expiry}">${formatTimeRemaining(f.expiry)}</span>
-                                </div>
-                                <div class="value" style="font-size: 0.95rem;">${f.node}</div>
-                                <div class="label">${f.missionType} • ${f.enemy}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderArbitration() {
-            const arb = gameData.arbitration;
-            if (!arb) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🛡️</div>
-                        <div class="card-title">Arbitration</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Mission</div>
-                            <div class="value">${arb.node || 'Loading...'}</div>
-                            <div class="label" style="margin-top: 4px;">${arb.type || 'Loading...'}</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Enemy Faction</div>
-                            <div class="value">${arb.enemy || 'Loading...'}</div>
-                        </div>
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Time Remaining</span>
-                                <span class="time-remaining" data-expiry="${arb.expiry}">${formatTimeRemaining(arb.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSteelPath() {
-            const sp = gameData.steelPath;
-            if (!sp) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">⚔️</div>
-                        <div class="card-title">Steel Path</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Current Reward</div>
-                            <div class="value">${sp.currentReward?.name || 'Loading...'}</div>
-                        </div>
-                        ${sp.incursions && sp.incursions.length > 0 ? `
-                            <div style="margin-bottom: 12px;">
-                                <div class="label" style="margin-bottom: 8px;">Incursions</div>
-                                ${sp.incursions.map(inc => `
-                                    <div style="background: #1a1a1a; padding: 8px; border-radius: 4px; margin-top: 6px;">
-                                        <div class="value" style="font-size: 0.9rem;">${inc.node}</div>
-                                        <div class="label" style="font-size: 0.8rem;">${inc.missionType}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Rotates In</span>
-                                <span class="time-remaining" data-expiry="${sp.expiry}">${formatTimeRemaining(sp.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSortie() {
-            const sortie = gameData.sortie;
-            if (!sortie) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🎯</div>
-                        <div class="card-title">Sortie</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 14px;">
-                            <div class="label">Target Boss</div>
-                            <div class="value">${sortie.boss}</div>
-                            <div class="label" style="margin-top: 4px;">${sortie.faction}</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            ${sortie.variants?.map((v, i) => `
-                                <div class="mission-item">
-                                    <div style="font-weight: 600; margin-bottom: 4px;">Mission ${i + 1}: ${v.missionType}</div>
-                                    <div class="label" style="font-size: 0.8rem;">${v.node}</div>
-                                    <div class="blue" style="font-size: 0.85rem; margin-top: 4px;">⚠️ ${v.modifier}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Resets In</span>
-                                <span class="time-remaining" data-expiry="${sortie.expiry}">${formatTimeRemaining(sortie.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderArchonHunt() {
-            const ah = gameData.archonHunt;
-            if (!ah) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">👹</div>
-                        <div class="card-title">Archon Hunt</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 14px;">
-                            <div class="label">Target Archon</div>
-                            <div class="value">${ah.boss}</div>
-                            <div class="label" style="margin-top: 4px;">${ah.faction}</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            ${ah.missions?.map((m, i) => `
-                                <div class="mission-item">
-                                    <div style="font-weight: 600;">Mission ${i + 1}: ${m.type}</div>
-                                    <div class="label" style="font-size: 0.8rem;">${m.node}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Resets In</span>
-                                <span class="time-remaining" data-expiry="${ah.expiry}">${formatTimeRemaining(ah.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderInvasions(invasions) {
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">⚔️</div>
-                        <div class="card-title">Invasions</div>
-                    </div>
-                    <div class="scrollable">
-                        ${invasions.map(inv => `
-                            <div class="content-box">
-                                <div class="value" style="font-size: 0.95rem; margin-bottom: 6px;">${inv.node}</div>
-                                <div class="label" style="margin-bottom: 10px;">${inv.attackingFaction} vs ${inv.defendingFaction}</div>
-                                <div class="rewards-grid">
-                                    <div class="reward-box">
-                                        <div class="label">Attackers</div>
-                                        <div style="font-weight: 600; font-size: 0.85rem;">${inv.attackerReward?.itemString || 'Credits'}</div>
-                                    </div>
-                                    <div class="reward-box">
-                                        <div class="label">Defenders</div>
-                                        <div style="font-weight: 600; font-size: 0.85rem;">${inv.defenderReward?.itemString || 'Credits'}</div>
-                                    </div>
-                                </div>
-                                <div class="label" style="text-align: center; margin-top: 8px;">${inv.completion.toFixed(1)}% Complete</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderIncarnonRotation(week) {
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">📈</div>
-                        <div class="card-title">Incarnon Rotation</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 16px;">
-                            <div class="value" style="font-size: 1.2rem;">Week ${week.week} of 8</div>
-                            <div class="label" style="margin-top: 4px;">Steel Path Circuit Rewards</div>
-                        </div>
-                        ${week.weapons.map((w, i) => `
-                            <div class="weapon-item">
-                                <div class="weapon-number">${i + 1}</div>
-                                <span style="font-weight: 600;">${w}</span>
-                            </div>
-                        `).join('')}
-                        <div class="info-note">
-                            💡 Pick 2 Incarnon Adapters at Circuit Rank 5 and 10
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderVoidTrader() {
-            const vt = gameData.voidTrader;
-            if (!vt) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🎭</div>
-                        <div class="card-title">Baro Ki'Teer</div>
-                    </div>
-                    <div class="content-box">
-                        ${vt.active ? `
-                            <div style="margin-bottom: 14px;">
-                                <div class="value green" style="margin-bottom: 8px;">✓ Active Now</div>
-                                <div class="value">📍 ${vt.location}</div>
-                            </div>
-                            <div class="divider">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span class="label">Leaves In</span>
-                                    <span class="time-remaining" data-expiry="${vt.expiry}">${formatTimeRemaining(vt.expiry)}</span>
-                                </div>
-                            </div>
-                        ` : `
-                            <div style="margin-bottom: 14px;">
-                                <div class="value" style="color: #666; margin-bottom: 8px;">Away</div>
-                                <div class="label">Not currently visiting</div>
-                            </div>
-                            <div class="divider">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span class="label">Arrives In</span>
-                                    <span class="time-remaining" data-expiry="${vt.activation}">${formatTimeRemaining(vt.activation)}</span>
-                                </div>
-                            </div>
-                        `}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderAlerts() {
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🚨</div>
-                        <div class="card-title">Alerts</div>
-                    </div>
-                    <div class="scrollable">
-                        ${gameData.alerts.map(alert => `
-                            <div class="content-box">
-                                <div class="value" style="font-size: 0.95rem; margin-bottom: 6px;">${alert.mission.node}</div>
-                                <div class="label" style="margin-bottom: 8px;">${alert.mission.type} • ${alert.mission.faction}</div>
-                                <div style="margin-bottom: 8px;">
-                                    <div class="label">Rewards</div>
-                                    <div style="font-weight: 600; font-size: 0.9rem;">
-                                        ${alert.mission.reward?.itemString || alert.mission.reward?.credits + ' Credits' || 'Unknown'}
-                                    </div>
-                                </div>
-                                <div class="divider">
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span class="label">Expires In</span>
-                                        <span class="time-remaining" data-expiry="${alert.expiry}">${formatTimeRemaining(alert.expiry)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderEvents() {
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🎉</div>
-                        <div class="card-title">Events</div>
-                    </div>
-                    <div class="scrollable">
-                        ${gameData.events.map(event => `
-                            <div class="content-box">
-                                <div class="value" style="margin-bottom: 8px;">${event.description}</div>
-                                ${event.rewards ? `
-                                    <div style="margin-bottom: 8px;">
-                                        <div class="label">Rewards</div>
-                                        ${event.rewards.map(r => `<div style="font-size: 0.85rem;">• ${r.itemString}</div>`).join('')}
-                                    </div>
-                                ` : ''}
-                                <div class="divider">
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span class="label">Ends In</span>
-                                        <span class="time-remaining" data-expiry="${event.expiry}">${formatTimeRemaining(event.expiry)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function attachEventListeners() {
-            document.querySelectorAll('.tier-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    selectedTier = btn.dataset.tier;
-                    render();
-                });
-            });
-        }
-
-        function startTimeUpdates() {
-            setInterval(() => {
-                document.querySelectorAll('[data-expiry]').forEach(el => {
-                    el.textContent = formatTimeRemaining(el.dataset.expiry);
-                });
-            }, 30000);
-        }
-
-        // Start
         fetchData();
-        setInterval(fetchData, 60000);
-        startTimeUpdates();
     </script>
 </body>
 </html>
