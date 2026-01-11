@@ -1,124 +1,1271 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Warframe Tracker — Node Proxy</title>
-<style>
-  body{font-family:Inter,system-ui,Arial;background:#050507;color:#eaeaea;margin:0}
-  header{padding:12px;background:#0b0d10;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  header h1{margin:0;font-size:1rem}
-  input{padding:8px;border-radius:6px;border:1px solid #222;background:#0b0d10;color:#eaeaea;min-width:220px}
-  button{padding:8px 10px;border-radius:6px;border:none;background:#1f6feb;color:white;cursor:pointer}
-  .container{padding:12px;max-width:1100px;margin:0 auto}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
-  .card{background:#0c0e11;padding:12px;border-radius:8px;border:1px solid #16181c}
-  pre{white-space:pre-wrap;word-break:break-word;font-size:0.85rem}
-  .muted{color:#9aa0b4;font-size:0.9rem}
-  @media (max-width:640px){header{padding:10px} .container{padding:8px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>Warframe Activity Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: #0a0a0a;
+            border-bottom: 2px solid #1a1a1a;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-indicator.offline {
+            background: #dc2626;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .refresh-btn, .clear-btn {
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .refresh-btn:hover, .clear-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+
+        .refresh-btn:active, .clear-btn:active {
+            transform: translateY(0);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s;
+            animation: cardEnter 0.4s ease;
+        }
+
+        @keyframes cardEnter {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .card:hover {
+            border-color: #333;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .card-icon {
+            font-size: 22px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .content-box {
+            background: #000;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1a1a1a;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .content-box:hover {
+            background: #0a0a0a;
+            border-color: #333;
+        }
+
+        .content-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .tier-filters {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tier-btn {
+            padding: 6px 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #666;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tier-btn:hover {
+            background: #333;
+        }
+
+        .tier-btn.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-right: 5px;
+            text-transform: uppercase;
+        }
+
+        .badge.lith, .badge.meso, .badge.neo, .badge.axi, .badge.requiem, .badge.omnia {
+            background: #666;
+            color: #000;
+        }
+
+        .badge.storm { background: #4a90e2; }
+
+        .time-remaining {
+            color: #4a90e2;
+            font-weight: 600;
+        }
+
+        .label {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .green { color: #10b981; }
+        .red { color: #dc2626; }
+        .blue { color: #4a90e2; }
+
+        .mission-item {
+            background: #000;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            font-size: 1.3rem;
+            gap: 20px;
+        }
+
+        .loading::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 4px solid #333;
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .divider {
+            border-top: 1px solid #1a1a1a;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .info-note {
+            background: #1a1a1a;
+            border-left: 3px solid #4a90e2;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .reward-box {
+            padding: 8px;
+            border-radius: 6px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+
+        .cycle-box {
+            background: #000;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .cycle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .weapon-item {
+            background: #1a1a1a;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            border: 1px solid #333;
+        }
+
+        .weapon-number {
+            width: 24px;
+            height: 24px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 10px;
+            color: #fff;
+        }
+
+        .error {
+            text-align: center;
+            padding: 30px;
+            color: #dc2626;
+        }
+
+        .search-results-header {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .cache-indicator {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px;
+            }
+
+            .title {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .search-input {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .refresh-btn, .clear-btn {
+                width: 100%;
+                padding: 12px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            .scrollable {
+                max-height: 300px;
+            }
+
+            .rewards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tier-filters {
+                gap: 4px;
+            }
+
+            .tier-btn {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1rem;
+            }
+
+            .card-icon {
+                font-size: 18px;
+            }
+
+            .value {
+                font-size: 0.9rem;
+            }
+
+            .label {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<header>
-  <h1>Warframe Tracker (Node proxy)</h1>
-  <div style="flex:1"></div>
-  <input id="q" placeholder="Search (e.g. arbitration, Baro, fissures)"/>
-  <button id="search">Search</button>
-  <button id="refresh">Refresh</button>
-</header>
+    <div class="header">
+        <div class="header-content">
+            <div class="title">
+                <span>⚡ WARFRAME TRACKER</span>
+                <div class="status-indicator" id="statusDot"></div>
+            </div>
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="Search anything (fissures, baro, sortie, etc.)"
+                />
+                <button class="refresh-btn" onclick="fetchData()">🔄 Refresh</button>
+                <button class="clear-btn" onclick="clearSearch()">✕ Clear</button>
+            </div>
+            <div class="cache-indicator" id="cacheInfo"></div>
+        </div>
+    </div>
+    
+    <div id="app"></div>
 
-<div class="container">
-  <div id="status" class="muted">Ready.</div>
-  <div id="grid" class="grid" style="margin-top:12px"></div>
-</div>
+    <script>
+        const API_BASE = 'https://api.warframestat.us/pc';
+        const CACHE_KEY = 'warframe_data_cache';
+        const CACHE_TIMESTAMP_KEY = 'warframe_cache_time';
+        const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
-<script>
-const grid = document.getElementById('grid');
-const status = document.getElementById('status');
-const qInput = document.getElementById('q');
+        const INCARNON_ROTATION = [
+            { week: 1, weapons: ['Braton', 'Lato', 'Skana', 'Paris', 'Kunai'] },
+            { week: 2, weapons: ['Boar', 'Gammacor', 'Angstrum', 'Gorgon', 'Anku'] },
+            { week: 3, weapons: ['Bo', 'Latron', 'Furis', 'Furax', 'Strun'] },
+            { week: 4, weapons: ['Lex', 'Magistar', 'Boltor', 'Bronco', 'Ceramic Dagger'] },
+            { week: 5, weapons: ['Torid', 'Dual Toxocyst', 'Dual Ichor', 'Miter'] },
+            { week: 6, weapons: ['Ack & Brunt', 'Soma', 'Vasto', 'Nami Solo', 'Burston'] },
+            { week: 7, weapons: ['Zylok', 'Sibear', 'Dread', 'Despair', 'Hate'] },
+            { week: 8, weapons: ['Dera', 'Sybaris', 'Cestra', 'Sicarus', 'Okina'] },
+        ];
 
-function setStatus(t){ status.textContent = t; }
+        let selectedTier = 'all';
+        let gameData = null;
+        let searchQuery = '';
+        let isOnline = navigator.onLine;
 
-function card(title, html){ return `<div class="card"><strong>${title}</strong><div style="margin-top:10px">${html}</div></div>`; }
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        fetch(e.request).catch(() => caches.match(e.request))
+                    );
+                });
+            `)).catch(() => {});
+        }
 
-async function fetchApi(path){
-  const res = await fetch(`/api/${path}`);
-  if(!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+        // Online/Offline Detection
+        window.addEventListener('online', () => {
+            isOnline = true;
+            updateStatus(true);
+            fetchData();
+        });
 
-function renderJsonAsSummary(obj){
-  // small readable summary: show some keys, else full JSON
-  try{
-    if(!obj) return '<div class="muted">None</div>';
-    if(Array.isArray(obj) && obj.length === 0) return '<div class="muted">None</div>';
-    if(typeof obj === 'object'){
-      // if it's a fissures list, show first 6
-      if(Array.isArray(obj)){
-        const sample = obj.slice(0,6).map(i=>`<div class="muted">${i.tier || ''} ${i.missionType || ''} · ${i.node || ''}</div>`).join('');
-        return sample + (obj.length>6?`<div class="muted">+ ${obj.length-6} more</div>` : '');
-      }
-      // small object: pretty-print some fields
-      return `<pre>${JSON.stringify(obj,null,2)}</pre>`;
-    }
-    return `<div>${String(obj)}</div>`;
-  }catch(e){
-    return `<pre>${escapeHtml(String(obj))}</pre>`;
-  }
-}
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            updateStatus(false);
+            loadFromCache();
+        });
 
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function updateStatus(online) {
+            const dot = document.getElementById('statusDot');
+            if (dot) {
+                dot.className = online ? 'status-indicator' : 'status-indicator offline';
+            }
+        }
 
-async function loadDashboard(){
-  setStatus('Loading dashboard...');
-  grid.innerHTML = '';
-  try{
-    const [fissures, alerts, invasions, sortie, voidTrader] = await Promise.all([
-      fetchApi('fissures').catch(()=>[]),
-      fetchApi('alerts').catch(()=>[]),
-      fetchApi('invasions').catch(()=>[]),
-      fetchApi('sortie').catch(()=>null),
-      fetchApi('voidTrader').catch(()=>null)
-    ]);
-    grid.insertAdjacentHTML('beforeend', card('Fissures', renderJsonAsSummary(fissures)));
-    grid.insertAdjacentHTML('beforeend', card('Alerts', renderJsonAsSummary(alerts)));
-    grid.insertAdjacentHTML('beforeend', card('Invasions', renderJsonAsSummary(invasions)));
-    grid.insertAdjacentHTML('beforeend', card('Sortie', renderJsonAsSummary(sortie)));
-    grid.insertAdjacentHTML('beforeend', card('Baro (Void Trader)', renderJsonAsSummary(voidTrader)));
-    setStatus('Dashboard loaded');
-  }catch(err){
-    setStatus('Dashboard error: ' + err.message);
-    grid.innerHTML = `<div class="card"><pre>${escapeHtml(err.stack || err.message)}</pre></div>`;
-  }
-}
+        function updateCacheInfo(fromCache = false) {
+            const info = document.getElementById('cacheInfo');
+            if (fromCache) {
+                const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+                const time = timestamp ? new Date(parseInt(timestamp)).toLocaleTimeString() : 'unknown';
+                info.textContent = `📦 Cached data from ${time}`;
+            } else {
+                info.textContent = `✓ Live data • Last updated: ${new Date().toLocaleTimeString()}`;
+            }
+        }
 
-async function doSearch(){
-  const q = qInput.value.trim();
-  if(!q){ setStatus('Type something to search'); return; }
-  setStatus('Searching remote API...');
-  grid.innerHTML = '';
-  try{
-    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json());
-    setStatus(`Search done — matches: ${Object.keys(res.matches||{}).length}`);
-    const matches = res.matches || {};
-    if(Object.keys(matches).length === 0){
-      grid.innerHTML = `<div class="card"><div class="muted">No results for "${escapeHtml(q)}"</div></div>`;
-      return;
-    }
-    for(const [k,v] of Object.entries(matches)){
-      grid.insertAdjacentHTML('beforeend', card(k, `<pre>${escapeHtml(JSON.stringify(v,null,2))}</pre>`));
-    }
-  }catch(err){
-    setStatus('Search failed: ' + err.message);
-    grid.innerHTML = `<div class="card"><pre>${escapeHtml(err.stack || err.message)}</pre></div>`;
-  }
-}
+        function saveToCache(data) {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+            } catch (e) {
+                console.warn('Cache storage failed:', e);
+            }
+        }
 
-document.getElementById('search').addEventListener('click', ()=>doSearch());
-qInput.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
-document.getElementById('refresh').addEventListener('click', ()=>loadDashboard());
+        function loadFromCache() {
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+                
+                if (cached && timestamp) {
+                    const age = Date.now() - parseInt(timestamp);
+                    if (age < CACHE_DURATION || !isOnline) {
+                        gameData = JSON.parse(cached);
+                        render();
+                        updateCacheInfo(true);
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.warn('Cache load failed:', e);
+            }
+            return false;
+        }
 
-loadDashboard();
-</script>
+        document.getElementById('searchInput')?.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            if (searchQuery) {
+                performDynamicSearch(searchQuery);
+            } else {
+                render();
+            }
+        });
+
+        document.getElementById('searchInput')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performDynamicSearch(searchQuery);
+            }
+        });
+
+        function clearSearch() {
+            searchQuery = '';
+            document.getElementById('searchInput').value = '';
+            render();
+        }
+
+        async function performDynamicSearch(query) {
+            if (!query) {
+                render();
+                return;
+            }
+
+            document.getElementById('app').innerHTML = '<div class="loading">Searching API...</div>';
+
+            const endpoints = [
+                'fissures', 'invasions', 'sortie', 'voidTrader', 'archonHunt',
+                'cetusCycle', 'vallisCycle', 'cambionCycle', 'earthCycle',
+                'alerts', 'events', 'nightwave', 'news', 'syndicateMissions'
+            ];
+
+            try {
+                const results = await Promise.all(
+                    endpoints.map(async (endpoint) => {
+                        try {
+                            const response = await fetch(`${API_BASE}/${endpoint}`);
+                            if (!response.ok) return null;
+                            const data = await response.json();
+                            
+                            const dataStr = JSON.stringify(data).toLowerCase();
+                            if (dataStr.includes(query)) {
+                                return { endpoint, data };
+                            }
+                            return null;
+                        } catch {
+                            return null;
+                        }
+                    })
+                );
+
+                const matches = results.filter(r => r !== null);
+                renderSearchResults(query, matches);
+            } catch (err) {
+                document.getElementById('app').innerHTML = `
+                    <div class="error">
+                        <div>⚠️ Search Failed</div>
+                        <div style="font-size: 1rem; margin-top: 10px;">${err.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderSearchResults(query, matches) {
+            if (matches.length === 0) {
+                document.getElementById('app').innerHTML = `
+                    <div class="container">
+                        <div class="search-results-header">
+                            <div style="font-weight: 600;">No results found for "${query}"</div>
+                            <div style="margin-top: 5px; font-size: 0.85rem; color: #666;">Try searching: fissures, baro, sortie, invasions, events, cycles</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let content = `
+                <div class="container">
+                    <div class="search-results-header">
+                        <div style="font-weight: 600;">🔍 Search Results for "${query}"</div>
+                        <div style="margin-top: 5px; font-size: 0.85rem; color: #666;">Found ${matches.length} matching endpoint(s)</div>
+                    </div>
+                    <div class="grid">
+            `;
+
+            matches.forEach(({ endpoint, data }) => {
+                content += renderDynamicEndpoint(endpoint, data, query);
+            });
+
+            content += '</div></div>';
+            document.getElementById('app').innerHTML = content;
+        }
+
+        function renderDynamicEndpoint(endpoint, data, query) {
+            const title = endpoint.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+            
+            if (Array.isArray(data)) {
+                const items = data.slice(0, 5).map(item => {
+                    const itemStr = JSON.stringify(item);
+                    const preview = item.node || item.description || item.message || item.boss || 'Data';
+                    return `<div class="content-box"><div class="value" style="font-size: 0.9rem;">${preview}</div></div>`;
+                }).join('');
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📋</div>
+                            <div class="card-title">${title}</div>
+                        </div>
+                        ${items}
+                        ${data.length > 5 ? `<div class="label" style="text-align: center; margin-top: 10px;">+ ${data.length - 5} more items</div>` : ''}
+                    </div>
+                `;
+            } else if (typeof data === 'object') {
+                let content = '';
+                Object.entries(data).slice(0, 8).forEach(([key, value]) => {
+                    if (typeof value !== 'object') {
+                        content += `<div style="margin-bottom: 6px;"><span class="label">${key}:</span> <span class="value" style="font-size: 0.85rem;">${value}</span></div>`;
+                    }
+                });
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📦</div>
+                            <div class="card-title">${title}</div>
+                        </div>
+                        <div class="content-box">${content}</div>
+                    </div>
+                `;
+            }
+            
+            return '';
+        }
+
+        function formatTimeRemaining(expiry) {
+            const now = new Date();
+            const end = new Date(expiry);
+            const diff = end - now;
+
+            if (diff <= 0) return 'Expired';
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        }
+
+        function getCurrentIncarnonWeek() {
+            const startDate = new Date('2024-10-07T00:00:00Z');
+            const now = new Date();
+            const diffTime = now - startDate;
+            const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+            const currentWeek = (diffWeeks % 8) + 1;
+            return INCARNON_ROTATION.find(r => r.week === currentWeek);
+        }
+
+        function matchesSearch(text) {
+            if (!searchQuery) return true;
+            return text.toLowerCase().includes(searchQuery);
+        }
+
+        async function fetchData() {
+            if (!isOnline && loadFromCache()) {
+                return;
+            }
+
+            document.getElementById('app').innerHTML = '<div class="loading">Loading Warframe Data...</div>';
+
+            try {
+                const [
+                    fissures,
+                    invasions,
+                    sortie,
+                    voidTrader,
+                    archonHunt,
+                    cetusCycle,
+                    vallisCycle,
+                    cambionCycle,
+                    earthCycle,
+                    alerts,
+                    events
+                ] = await Promise.all([
+                    fetch(`${API_BASE}/fissures`).then(r => r.json()).catch(() => []),
+                    fetch(`${API_BASE}/invasions`).then(r => r.json()).catch(() => []),
+                    fetch(`${API_BASE}/sortie`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/voidTrader`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/archonHunt`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/cetusCycle`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/vallisCycle`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/cambionCycle`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/earthCycle`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/alerts`).then(r => r.json()).catch(() => []),
+                    fetch(`${API_BASE}/events`).then(r => r.json()).catch(() => [])
+                ]);
+
+                gameData = {
+                    fissures,
+                    invasions,
+                    sortie,
+                    voidTrader,
+                    archonHunt,
+                    cetusCycle,
+                    vallisCycle,
+                    cambionCycle,
+                    earthCycle,
+                    alerts,
+                    events
+                };
+
+                saveToCache(gameData);
+                updateCacheInfo(false);
+                render();
+            } catch (err) {
+                console.error('Error:', err);
+                if (loadFromCache()) {
+                    return;
+                }
+                document.getElementById('app').innerHTML = `
+                    <div class="error">
+                        <div>⚠️ Error Loading Data</div>
+                        <div style="font-size: 1rem; margin-top: 20px;">${err.message}</div>
+                        <button class="refresh-btn" onclick="fetchData()" style="margin-top: 20px;">🔄 Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        function render() {
+            if (!gameData) return;
+
+            let content = '';
+
+            // Open World Cycles
+            content += renderCycles();
+
+            // Void Fissures
+            const filteredFissures = gameData.fissures.filter(f => 
+                (selectedTier === 'all' || f.tier === selectedTier) &&
+                matchesSearch(`${f.node} ${f.missionType} ${f.tier} ${f.enemy}`)
+            );
+            if (filteredFissures.length > 0) {
+                content += renderVoidFissures(filteredFissures);
+            }
+
+            // Sortie
+            if (gameData.sortie && matchesSearch(`sortie ${gameData.sortie.boss}`)) {
+                content += renderSortie();
+            }
+
+            // Archon Hunt
+            if (gameData.archonHunt && matchesSearch(`archon ${gameData.archonHunt.boss}`)) {
+                content += renderArchonHunt();
+            }
+
+            // Invasions
+            const activeInvasions = gameData.invasions.filter(inv => !inv.completed);
+            if (activeInvasions.length > 0 && activeInvasions.some(inv => matchesSearch(`invasion ${inv.node}`))) {
+                content += renderInvasions(activeInvasions);
+            }
+
+            // Incarnon
+            if (matchesSearch('incarnon circuit')) {
+                const currentWeek = getCurrentIncarnonWeek();
+                content += renderIncarnonRotation(currentWeek);
+            }
+
+            // Void Trader
+            if (gameData.voidTrader && matchesSearch('baro void trader')) {
+                content += renderVoidTrader();
+            }
+
+            // Alerts
+            if (gameData.alerts.length > 0 && matchesSearch('alert')) {
+                content += renderAlerts();
+            }
+
+            // Events
+            if (gameData.events.length > 0 && gameData.events.some(e => matchesSearch(`event ${e.description}`))) {
+                content += renderEvents();
+            }
+
+            document.getElementById('app').innerHTML = `<div class="container"><div class="grid">${content}</div></div>`;
+            attachEventListeners();
+        }
+
+        function renderCycles() {
+            const { cetusCycle, vallisCycle, cambionCycle, earthCycle } = gameData;
+            if (!cetusCycle && !vallisCycle && !cambionCycle && !earthCycle) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🌍</div>
+                        <div class="card-title">Open World Cycles</div>
+                    </div>
+                    ${cetusCycle ? `
+                        <div class="cycle-box">
+                            <div class="cycle-header">
+                                <span style="font-weight: 600;">Plains of Eidolon</span>
+                                <span class="badge" style="background: ${cetusCycle.isDay ? '#f59e0b' : '#3b82f6'};">
+                                    ${cetusCycle.isDay ? '☀️ Day' : '🌙 Night'}
+                                </span>
+                            </div>
+                            <div class="label">
+                                ${cetusCycle.isDay ? 'Night' : 'Day'} in: 
+                                <span class="time-remaining" data-expiry="${cetusCycle.expiry}">${formatTimeRemaining(cetusCycle.expiry)}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${earthCycle ? `
+                        <div class="cycle-box">
+                            <div class="cycle-header">
+                                <span style="font-weight: 600;">Earth</span>
+                                <span class="badge" style="background: ${earthCycle.isDay ? '#f59e0b' : '#3b82f6'};">
+                                    ${earthCycle.isDay ? '☀️ Day' : '🌙 Night'}
+                                </span>
+                            </div>
+                            <div class="label">
+                                ${earthCycle.isDay ? 'Night' : 'Day'} in: 
+                                <span class="time-remaining" data-expiry="${earthCycle.expiry}">${formatTimeRemaining(earthCycle.expiry)}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${vallisCycle ? `
+                        <div class="cycle-box">
+                            <div class="cycle-header">
+                                <span style="font-weight: 600;">Orb Vallis</span>
+                                <span class="badge" style="background: ${vallisCycle.isWarm ? '#ea580c' : '#06b6d4'};">
+                                    ${vallisCycle.isWarm ? '🔥 Warm' : '❄️ Cold'}
+                                </span>
+                            </div>
+                            <div class="label">
+                                ${vallisCycle.isWarm ? 'Cold' : 'Warm'} in: 
+                                <span class="time-remaining" data-expiry="${vallisCycle.expiry}">${formatTimeRemaining(vallisCycle.expiry)}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${cambionCycle ? `
+                        <div class="cycle-box" style="margin-bottom: 0;">
+                            <div class="cycle-header">
+                                <span style="font-weight: 600;">Cambion Drift</span>
+                                <span class="badge" style="background: #9333ea;">
+                                    ${cambionCycle.active?.toUpperCase() || 'UNKNOWN'}
+                                </span>
+                            </div>
+                            <div class="label">
+                                Changes in: 
+                                <span class="time-remaining" data-expiry="${cambionCycle.expiry}">${formatTimeRemaining(cambionCycle.expiry)}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderVoidFissures(fissures) {
+            const normalFissures = fissures.filter(f => !f.isHard);
+            const steelFissures = fissures.filter(f => f.isHard);
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">Void Fissures</div>
+                    </div>
+                    <div class="tier-filters">
+                        ${['all', 'Lith', 'Meso', 'Neo', 'Axi', 'Requiem', 'Omnia'].map(tier => `
+                            <button class="tier-btn ${selectedTier === tier ? 'active' : ''}" data-tier="${tier}">
+                                ${tier}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="scrollable">
+                        ${normalFissures.length > 0 ? '<div style="color: #fff; font-weight: 600; margin-bottom: 10px; font-size: 0.9rem;">Normal Fissures</div>' : ''}
+                        ${normalFissures.map(f => `
+                            <div class="content-box">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 5px;">
+                                    <div>
+                                        <span class="badge ${f.tier.toLowerCase()}">${f.tier}</span>
+                                        ${f.isStorm ? '<span class="badge storm">Storm</span>' : ''}
+                                    </div>
+                                    <span class="time-remaining" data-expiry="${f.expiry}">${formatTimeRemaining(f.expiry)}</span>
+                                </div>
+                                <div class="value" style="font-size: 0.9rem;">${f.node}</div>
+                                <div class="label" style="font-size: 0.8rem;">${f.missionType} • ${f.enemy}</div>
+                            </div>
+                        `).join('')}
+                        ${steelFissures.length > 0 ? '<div style="color: #dc2626; font-weight: 600; margin: 12px 0 8px 0; font-size: 0.9rem;">Steel Path Fissures</div>' : ''}
+                        ${steelFissures.map(f => `
+                            <div class="content-box" style="border-color: #dc2626;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 5px;">
+                                    <div>
+                                        <span class="badge ${f.tier.toLowerCase()}">${f.tier}</span>
+                                        <span class="badge" style="background: #dc2626;">Steel</span>
+                                        ${f.isStorm ? '<span class="badge storm">Storm</span>' : ''}
+                                    </div>
+                                    <span class="time-remaining" data-expiry="${f.expiry}">${formatTimeRemaining(f.expiry)}</span>
+                                </div>
+                                <div class="value" style="font-size: 0.9rem;">${f.node}</div>
+                                <div class="label" style="font-size: 0.8rem;">${f.missionType} • ${f.enemy}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSortie() {
+            const sortie = gameData.sortie;
+            if (!sortie) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🎯</div>
+                        <div class="card-title">Sortie</div>
+                    </div>
+                    <div class="content-box">
+                        <div style="margin-bottom: 12px;">
+                            <div class="label">Target Boss</div>
+                            <div class="value">${sortie.boss}</div>
+                            <div class="label" style="margin-top: 4px;">${sortie.faction}</div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            ${sortie.variants?.map((v, i) => `
+                                <div class="mission-item">
+                                    <div style="font-weight: 600; margin-bottom: 4px; font-size: 0.9rem;">Mission ${i + 1}: ${v.missionType}</div>
+                                    <div class="label" style="font-size: 0.75rem;">${v.node}</div>
+                                    <div class="blue" style="font-size: 0.8rem; margin-top: 4px;">⚠️ ${v.modifier}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="divider">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span class="label">Resets In</span>
+                                <span class="time-remaining" data-expiry="${sortie.expiry}">${formatTimeRemaining(sortie.expiry)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderArchonHunt() {
+            const ah = gameData.archonHunt;
+            if (!ah) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">👹</div>
+                        <div class="card-title">Archon Hunt</div>
+                    </div>
+                    <div class="content-box">
+                        <div style="margin-bottom: 12px;">
+                            <div class="label">Target Archon</div>
+                            <div class="value">${ah.boss}</div>
+                            <div class="label" style="margin-top: 4px;">${ah.faction}</div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            ${ah.missions?.map((m, i) => `
+                                <div class="mission-item">
+                                    <div style="font-weight: 600; font-size: 0.9rem;">Mission ${i + 1}: ${m.type}</div>
+                                    <div class="label" style="font-size: 0.75rem;">${m.node}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="divider">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span class="label">Resets In</span>
+                                <span class="time-remaining" data-expiry="${ah.expiry}">${formatTimeRemaining(ah.expiry)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInvasions(invasions) {
+            const filtered = invasions.filter(inv => matchesSearch(`invasion ${inv.node}`));
+            if (filtered.length === 0) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">⚔️</div>
+                        <div class="card-title">Invasions</div>
+                    </div>
+                    <div class="scrollable">
+                        ${filtered.map(inv => `
+                            <div class="content-box">
+                                <div class="value" style="font-size: 0.9rem; margin-bottom: 6px;">${inv.node}</div>
+                                <div class="label" style="margin-bottom: 8px; font-size: 0.8rem;">${inv.attackingFaction} vs ${inv.defendingFaction}</div>
+                                <div class="rewards-grid">
+                                    <div class="reward-box">
+                                        <div class="label" style="font-size: 0.75rem;">Attackers</div>
+                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.attackerReward?.itemString || 'Credits'}</div>
+                                    </div>
+                                    <div class="reward-box">
+                                        <div class="label" style="font-size: 0.75rem;">Defenders</div>
+                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.defenderReward?.itemString || 'Credits'}</div>
+                                    </div>
+                                </div>
+                                <div class="label" style="text-align: center; margin-top: 6px; font-size: 0.8rem;">${inv.completion.toFixed(1)}% Complete</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderIncarnonRotation(week) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📈</div>
+                        <div class="card-title">Incarnon Rotation</div>
+                    </div>
+                    <div class="content-box">
+                        <div style="margin-bottom: 14px;">
+                            <div class="value" style="font-size: 1.1rem;">Week ${week.week} of 8</div>
+                            <div class="label" style="margin-top: 4px;">Steel Path Circuit Rewards</div>
+                        </div>
+                        ${week.weapons.map((w, i) => `
+                            <div class="weapon-item">
+                                <div class="weapon-number">${i + 1}</div>
+                                <span style="font-weight: 600; font-size: 0.9rem;">${w}</span>
+                            </div>
+                        `).join('')}
+                        <div class="info-note">
+                            💡 Pick 2 Incarnon Adapters at Circuit Rank 5 and 10
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVoidTrader() {
+            const vt = gameData.voidTrader;
+            if (!vt) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🎭</div>
+                        <div class="card-title">Baro Ki'Teer</div>
+                    </div>
+                    <div class="content-box">
+                        ${vt.active ? `
+                            <div style="margin-bottom: 12px;">
+                                <div class="value green" style="margin-bottom: 8px;">✓ Active Now</div>
+                                <div class="value" style="font-size: 0.95rem;">📍 ${vt.location}</div>
+                            </div>
+                            <div class="divider">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="label">Leaves In</span>
+                                    <span class="time-remaining" data-expiry="${vt.expiry}">${formatTimeRemaining(vt.expiry)}</span>
+                                </div>
+                            </div>
+                        ` : `
+                            <div style="margin-bottom: 12px;">
+                                <div class="value" style="color: #666; margin-bottom: 8px;">Away</div>
+                                <div class="label">Not currently visiting</div>
+                            </div>
+                            <div class="divider">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="label">Arrives In</span>
+                                    <span class="time-remaining" data-expiry="${vt.activation}">${formatTimeRemaining(vt.activation)}</span>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAlerts() {
+            const filtered = gameData.alerts.filter(a => matchesSearch(`alert ${a.mission.node}`));
+            if (filtered.length === 0) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🚨</div>
+                        <div class="card-title">Alerts</div>
+                    </div>
+                    <div class="scrollable">
+                        ${filtered.map(alert => `
+                            <div class="content-box">
+                                <div class="value" style="font-size: 0.9rem; margin-bottom: 6px;">${alert.mission.node}</div>
+                                <div class="label" style="margin-bottom: 8px; font-size: 0.8rem;">${alert.mission.type} • ${alert.mission.faction}</div>
+                                <div style="margin-bottom: 8px;">
+                                    <div class="label" style="font-size: 0.75rem;">Rewards</div>
+                                    <div style="font-weight: 600; font-size: 0.85rem;">
+                                        ${alert.mission.reward?.itemString || alert.mission.reward?.credits + ' Credits' || 'Unknown'}
+                                    </div>
+                                </div>
+                                <div class="divider">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span class="label">Expires In</span>
+                                        <span class="time-remaining" data-expiry="${alert.expiry}">${formatTimeRemaining(alert.expiry)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEvents() {
+            const filtered = gameData.events.filter(e => matchesSearch(`event ${e.description}`));
+            if (filtered.length === 0) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🎉</div>
+                        <div class="card-title">Events</div>
+                    </div>
+                    <div class="scrollable">
+                        ${filtered.map(event => `
+                            <div class="content-box">
+                                <div class="value" style="margin-bottom: 8px; font-size: 0.9rem;">${event.description}</div>
+                                ${event.rewards ? `
+                                    <div style="margin-bottom: 8px;">
+                                        <div class="label" style="font-size: 0.75rem;">Rewards</div>
+                                        ${event.rewards.map(r => `<div style="font-size: 0.8rem;">• ${r.itemString}</div>`).join('')}
+                                    </div>
+                                ` : ''}
+                                <div class="divider">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span class="label">Ends In</span>
+                                        <span class="time-remaining" data-expiry="${event.expiry}">${formatTimeRemaining(event.expiry)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function attachEventListeners() {
+            document.querySelectorAll('.tier-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedTier = btn.dataset.tier;
+                    render();
+                });
+            });
+        }
+
+        function startTimeUpdates() {
+            setInterval(() => {
+                document.querySelectorAll('[data-expiry]').forEach(el => {
+                    el.textContent = formatTimeRemaining(el.dataset.expiry);
+                });
+            }, 30000);
+        }
+
+        // Initialize
+        updateStatus(isOnline);
+        if (!loadFromCache()) {
+            fetchData();
+        }
+        setInterval(fetchData, 60000);
+        startTimeUpdates();
+    </script>
 </body>
 </html>
