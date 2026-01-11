@@ -28,12 +28,6 @@
             top: 0;
             z-index: 100;
             backdrop-filter: blur(10px);
-            animation: slideDown 0.4s ease;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .header-content {
@@ -62,10 +56,6 @@
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
-        }
-
-        .status-indicator.offline {
-            background: #dc2626;
         }
 
         .search-bar {
@@ -110,10 +100,6 @@
             transform: translateY(-2px);
         }
 
-        .refresh-btn:active, .clear-btn:active {
-            transform: translateY(0);
-        }
-
         .container {
             max-width: 1600px;
             margin: 0 auto;
@@ -124,12 +110,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 15px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .card {
@@ -138,12 +118,6 @@
             border-radius: 12px;
             padding: 16px;
             transition: all 0.3s;
-            animation: cardEnter 0.4s ease;
-        }
-
-        @keyframes cardEnter {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
         }
 
         .card:hover {
@@ -183,10 +157,6 @@
         .content-box:hover {
             background: #0a0a0a;
             border-color: #333;
-        }
-
-        .content-box:last-child {
-            margin-bottom: 0;
         }
 
         .scrollable {
@@ -380,96 +350,15 @@
             color: #dc2626;
         }
 
-        .search-results-header {
-            background: #1a1a1a;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #4a90e2;
-        }
-
         .cache-indicator {
             font-size: 0.75rem;
             color: #666;
             margin-top: 5px;
         }
 
-        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .header {
-                padding: 12px;
-            }
-
-            .title {
-                font-size: 1.2rem;
-                margin-bottom: 10px;
-            }
-
-            .search-bar {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .search-input {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .refresh-btn, .clear-btn {
-                width: 100%;
-                padding: 12px;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
             .grid {
                 grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .card {
-                padding: 12px;
-            }
-
-            .card-title {
-                font-size: 1rem;
-            }
-
-            .scrollable {
-                max-height: 300px;
-            }
-
-            .rewards-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .tier-filters {
-                gap: 4px;
-            }
-
-            .tier-btn {
-                font-size: 0.75rem;
-                padding: 5px 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .title {
-                font-size: 1rem;
-            }
-
-            .card-icon {
-                font-size: 18px;
-            }
-
-            .value {
-                font-size: 0.9rem;
-            }
-
-            .label {
-                font-size: 0.75rem;
             }
         }
     </style>
@@ -486,7 +375,7 @@
                     type="text" 
                     class="search-input" 
                     id="searchInput" 
-                    placeholder="Search anything (fissures, baro, sortie, etc.)"
+                    placeholder="Search activities, missions, rewards..."
                 />
                 <button class="refresh-btn" onclick="fetchData()">🔄 Refresh</button>
                 <button class="clear-btn" onclick="clearSearch()">✕ Clear</button>
@@ -499,9 +388,6 @@
 
     <script>
         const API_BASE = 'https://api.warframestat.us/pc';
-        const CACHE_KEY = 'warframe_data_cache';
-        const CACHE_TIMESTAMP_KEY = 'warframe_cache_time';
-        const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
         const INCARNON_ROTATION = [
             { week: 1, weapons: ['Braton', 'Lato', 'Skana', 'Paris', 'Kunai'] },
@@ -517,217 +403,16 @@
         let selectedTier = 'all';
         let gameData = null;
         let searchQuery = '';
-        let isOnline = navigator.onLine;
-
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
-                self.addEventListener('install', e => self.skipWaiting());
-                self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-                self.addEventListener('fetch', e => {
-                    e.respondWith(
-                        fetch(e.request).catch(() => caches.match(e.request))
-                    );
-                });
-            `)).catch(() => {});
-        }
-
-        // Online/Offline Detection
-        window.addEventListener('online', () => {
-            isOnline = true;
-            updateStatus(true);
-            fetchData();
-        });
-
-        window.addEventListener('offline', () => {
-            isOnline = false;
-            updateStatus(false);
-            loadFromCache();
-        });
-
-        function updateStatus(online) {
-            const dot = document.getElementById('statusDot');
-            if (dot) {
-                dot.className = online ? 'status-indicator' : 'status-indicator offline';
-            }
-        }
-
-        function updateCacheInfo(fromCache = false) {
-            const info = document.getElementById('cacheInfo');
-            if (fromCache) {
-                const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-                const time = timestamp ? new Date(parseInt(timestamp)).toLocaleTimeString() : 'unknown';
-                info.textContent = `📦 Cached data from ${time}`;
-            } else {
-                info.textContent = `✓ Live data • Last updated: ${new Date().toLocaleTimeString()}`;
-            }
-        }
-
-        function saveToCache(data) {
-            try {
-                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-                localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
-            } catch (e) {
-                console.warn('Cache storage failed:', e);
-            }
-        }
-
-        function loadFromCache() {
-            try {
-                const cached = localStorage.getItem(CACHE_KEY);
-                const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-                
-                if (cached && timestamp) {
-                    const age = Date.now() - parseInt(timestamp);
-                    if (age < CACHE_DURATION || !isOnline) {
-                        gameData = JSON.parse(cached);
-                        render();
-                        updateCacheInfo(true);
-                        return true;
-                    }
-                }
-            } catch (e) {
-                console.warn('Cache load failed:', e);
-            }
-            return false;
-        }
 
         document.getElementById('searchInput')?.addEventListener('input', (e) => {
             searchQuery = e.target.value.toLowerCase().trim();
-            if (searchQuery) {
-                performDynamicSearch(searchQuery);
-            } else {
-                render();
-            }
-        });
-
-        document.getElementById('searchInput')?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                performDynamicSearch(searchQuery);
-            }
+            render();
         });
 
         function clearSearch() {
             searchQuery = '';
             document.getElementById('searchInput').value = '';
             render();
-        }
-
-        async function performDynamicSearch(query) {
-            if (!query) {
-                render();
-                return;
-            }
-
-            document.getElementById('app').innerHTML = '<div class="loading">Searching API...</div>';
-
-            const endpoints = [
-                'fissures', 'invasions', 'sortie', 'voidTrader', 'archonHunt',
-                'cetusCycle', 'vallisCycle', 'cambionCycle', 'earthCycle',
-                'alerts', 'events', 'nightwave', 'news', 'syndicateMissions'
-            ];
-
-            try {
-                const results = await Promise.all(
-                    endpoints.map(async (endpoint) => {
-                        try {
-                            const response = await fetch(`${API_BASE}/${endpoint}`);
-                            if (!response.ok) return null;
-                            const data = await response.json();
-                            
-                            const dataStr = JSON.stringify(data).toLowerCase();
-                            if (dataStr.includes(query)) {
-                                return { endpoint, data };
-                            }
-                            return null;
-                        } catch {
-                            return null;
-                        }
-                    })
-                );
-
-                const matches = results.filter(r => r !== null);
-                renderSearchResults(query, matches);
-            } catch (err) {
-                document.getElementById('app').innerHTML = `
-                    <div class="error">
-                        <div>⚠️ Search Failed</div>
-                        <div style="font-size: 1rem; margin-top: 10px;">${err.message}</div>
-                    </div>
-                `;
-            }
-        }
-
-        function renderSearchResults(query, matches) {
-            if (matches.length === 0) {
-                document.getElementById('app').innerHTML = `
-                    <div class="container">
-                        <div class="search-results-header">
-                            <div style="font-weight: 600;">No results found for "${query}"</div>
-                            <div style="margin-top: 5px; font-size: 0.85rem; color: #666;">Try searching: fissures, baro, sortie, invasions, events, cycles</div>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            let content = `
-                <div class="container">
-                    <div class="search-results-header">
-                        <div style="font-weight: 600;">🔍 Search Results for "${query}"</div>
-                        <div style="margin-top: 5px; font-size: 0.85rem; color: #666;">Found ${matches.length} matching endpoint(s)</div>
-                    </div>
-                    <div class="grid">
-            `;
-
-            matches.forEach(({ endpoint, data }) => {
-                content += renderDynamicEndpoint(endpoint, data, query);
-            });
-
-            content += '</div></div>';
-            document.getElementById('app').innerHTML = content;
-        }
-
-        function renderDynamicEndpoint(endpoint, data, query) {
-            const title = endpoint.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-            
-            if (Array.isArray(data)) {
-                const items = data.slice(0, 5).map(item => {
-                    const itemStr = JSON.stringify(item);
-                    const preview = item.node || item.description || item.message || item.boss || 'Data';
-                    return `<div class="content-box"><div class="value" style="font-size: 0.9rem;">${preview}</div></div>`;
-                }).join('');
-                
-                return `
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-icon">📋</div>
-                            <div class="card-title">${title}</div>
-                        </div>
-                        ${items}
-                        ${data.length > 5 ? `<div class="label" style="text-align: center; margin-top: 10px;">+ ${data.length - 5} more items</div>` : ''}
-                    </div>
-                `;
-            } else if (typeof data === 'object') {
-                let content = '';
-                Object.entries(data).slice(0, 8).forEach(([key, value]) => {
-                    if (typeof value !== 'object') {
-                        content += `<div style="margin-bottom: 6px;"><span class="label">${key}:</span> <span class="value" style="font-size: 0.85rem;">${value}</span></div>`;
-                    }
-                });
-                
-                return `
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-icon">📦</div>
-                            <div class="card-title">${title}</div>
-                        </div>
-                        <div class="content-box">${content}</div>
-                    </div>
-                `;
-            }
-            
-            return '';
         }
 
         function formatTimeRemaining(expiry) {
@@ -761,26 +446,10 @@
         }
 
         async function fetchData() {
-            if (!isOnline && loadFromCache()) {
-                return;
-            }
-
             document.getElementById('app').innerHTML = '<div class="loading">Loading Warframe Data...</div>';
 
             try {
-                const [
-                    fissures,
-                    invasions,
-                    sortie,
-                    voidTrader,
-                    archonHunt,
-                    cetusCycle,
-                    vallisCycle,
-                    cambionCycle,
-                    earthCycle,
-                    alerts,
-                    events
-                ] = await Promise.all([
+                const responses = await Promise.all([
                     fetch(`${API_BASE}/fissures`).then(r => r.json()).catch(() => []),
                     fetch(`${API_BASE}/invasions`).then(r => r.json()).catch(() => []),
                     fetch(`${API_BASE}/sortie`).then(r => r.json()).catch(() => null),
@@ -791,31 +460,36 @@
                     fetch(`${API_BASE}/cambionCycle`).then(r => r.json()).catch(() => null),
                     fetch(`${API_BASE}/earthCycle`).then(r => r.json()).catch(() => null),
                     fetch(`${API_BASE}/alerts`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/events`).then(r => r.json()).catch(() => [])
+                    fetch(`${API_BASE}/events`).then(r => r.json()).catch(() => []),
+                    fetch(`${API_BASE}/nightwave`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/arbitration`).then(r => r.json()).catch(() => null),
+                    fetch(`${API_BASE}/steelPath`).then(r => r.json()).catch(() => null)
                 ]);
 
                 gameData = {
-                    fissures,
-                    invasions,
-                    sortie,
-                    voidTrader,
-                    archonHunt,
-                    cetusCycle,
-                    vallisCycle,
-                    cambionCycle,
-                    earthCycle,
-                    alerts,
-                    events
+                    fissures: responses[0],
+                    invasions: responses[1],
+                    sortie: responses[2],
+                    voidTrader: responses[3],
+                    archonHunt: responses[4],
+                    cetusCycle: responses[5],
+                    vallisCycle: responses[6],
+                    cambionCycle: responses[7],
+                    earthCycle: responses[8],
+                    alerts: responses[9],
+                    events: responses[10],
+                    nightwave: responses[11],
+                    arbitration: responses[12],
+                    steelPath: responses[13]
                 };
 
-                saveToCache(gameData);
-                updateCacheInfo(false);
+                const cacheInfo = document.getElementById('cacheInfo');
+                if (cacheInfo) {
+                    cacheInfo.textContent = `✓ Live data • Last updated: ${new Date().toLocaleTimeString()}`;
+                }
+
                 render();
             } catch (err) {
-                console.error('Error:', err);
-                if (loadFromCache()) {
-                    return;
-                }
                 document.getElementById('app').innerHTML = `
                     <div class="error">
                         <div>⚠️ Error Loading Data</div>
@@ -832,7 +506,9 @@
             let content = '';
 
             // Open World Cycles
-            content += renderCycles();
+            if (matchesSearch('cycle cetus vallis cambion earth')) {
+                content += renderCycles();
+            }
 
             // Void Fissures
             const filteredFissures = gameData.fissures.filter(f => 
@@ -844,13 +520,23 @@
             }
 
             // Sortie
-            if (gameData.sortie && matchesSearch(`sortie ${gameData.sortie.boss}`)) {
+            if (gameData.sortie && matchesSearch(`sortie ${gameData.sortie.boss || ''} ${gameData.sortie.faction || ''}`)) {
                 content += renderSortie();
             }
 
             // Archon Hunt
-            if (gameData.archonHunt && matchesSearch(`archon ${gameData.archonHunt.boss}`)) {
+            if (gameData.archonHunt && matchesSearch(`archon ${gameData.archonHunt.boss || ''}`)) {
                 content += renderArchonHunt();
+            }
+
+            // Arbitration
+            if (gameData.arbitration && matchesSearch('arbitration')) {
+                content += renderArbitration();
+            }
+
+            // Steel Path
+            if (gameData.steelPath && matchesSearch('steel path')) {
+                content += renderSteelPath();
             }
 
             // Invasions
@@ -861,8 +547,7 @@
 
             // Incarnon
             if (matchesSearch('incarnon circuit')) {
-                const currentWeek = getCurrentIncarnonWeek();
-                content += renderIncarnonRotation(currentWeek);
+                content += renderIncarnonRotation(getCurrentIncarnonWeek());
             }
 
             // Void Trader
@@ -876,8 +561,22 @@
             }
 
             // Events
-            if (gameData.events.length > 0 && gameData.events.some(e => matchesSearch(`event ${e.description}`))) {
-                content += renderEvents();
+            if (gameData.events.length > 0) {
+                const matchingEvents = gameData.events.filter(e => 
+                    matchesSearch(`event ${e.description || ''}`)
+                );
+                if (matchingEvents.length > 0) {
+                    content += renderEvents(matchingEvents);
+                }
+            }
+
+            // Nightwave
+            if (gameData.nightwave && matchesSearch('nightwave')) {
+                content += renderNightwave();
+            }
+
+            if (!content) {
+                content = `<div class="error">No activities found${searchQuery ? ` for "${searchQuery}"` : ''}</div>`;
             }
 
             document.getElementById('app').innerHTML = `<div class="container"><div class="grid">${content}</div></div>`;
@@ -903,8 +602,7 @@
                                 </span>
                             </div>
                             <div class="label">
-                                ${cetusCycle.isDay ? 'Night' : 'Day'} in: 
-                                <span class="time-remaining" data-expiry="${cetusCycle.expiry}">${formatTimeRemaining(cetusCycle.expiry)}</span>
+                                Changes in: <span class="time-remaining" data-expiry="${cetusCycle.expiry}">${formatTimeRemaining(cetusCycle.expiry)}</span>
                             </div>
                         </div>
                     ` : ''}
@@ -917,8 +615,7 @@
                                 </span>
                             </div>
                             <div class="label">
-                                ${earthCycle.isDay ? 'Night' : 'Day'} in: 
-                                <span class="time-remaining" data-expiry="${earthCycle.expiry}">${formatTimeRemaining(earthCycle.expiry)}</span>
+                                Changes in: <span class="time-remaining" data-expiry="${earthCycle.expiry}">${formatTimeRemaining(earthCycle.expiry)}</span>
                             </div>
                         </div>
                     ` : ''}
@@ -931,8 +628,7 @@
                                 </span>
                             </div>
                             <div class="label">
-                                ${vallisCycle.isWarm ? 'Cold' : 'Warm'} in: 
-                                <span class="time-remaining" data-expiry="${vallisCycle.expiry}">${formatTimeRemaining(vallisCycle.expiry)}</span>
+                                Changes in: <span class="time-remaining" data-expiry="${vallisCycle.expiry}">${formatTimeRemaining(vallisCycle.expiry)}</span>
                             </div>
                         </div>
                     ` : ''}
@@ -941,12 +637,11 @@
                             <div class="cycle-header">
                                 <span style="font-weight: 600;">Cambion Drift</span>
                                 <span class="badge" style="background: #9333ea;">
-                                    ${cambionCycle.active?.toUpperCase() || 'UNKNOWN'}
+                                    ${(cambionCycle.state || cambionCycle.active || 'unknown').toUpperCase()}
                                 </span>
                             </div>
                             <div class="label">
-                                Changes in: 
-                                <span class="time-remaining" data-expiry="${cambionCycle.expiry}">${formatTimeRemaining(cambionCycle.expiry)}</span>
+                                Changes in: <span class="time-remaining" data-expiry="${cambionCycle.expiry}">${formatTimeRemaining(cambionCycle.expiry)}</span>
                             </div>
                         </div>
                     ` : ''}
@@ -1007,8 +702,8 @@
         }
 
         function renderSortie() {
-            const sortie = gameData.sortie;
-            if (!sortie) return '';
+            const s = gameData.sortie;
+            if (!s) return '';
             
             return `
                 <div class="card">
@@ -1018,23 +713,25 @@
                     </div>
                     <div class="content-box">
                         <div style="margin-bottom: 12px;">
-                            <div class="label">Target Boss</div>
-                            <div class="value">${sortie.boss}</div>
-                            <div class="label" style="margin-top: 4px;">${sortie.faction}</div>
+                            <div class="label">Boss</div>
+                            <div class="value">${s.boss || 'Unknown'}</div>
+                            <div class="label" style="margin-top: 4px;">${s.faction || 'Unknown Faction'}</div>
                         </div>
-                        <div style="margin-bottom: 10px;">
-                            ${sortie.variants?.map((v, i) => `
-                                <div class="mission-item">
-                                    <div style="font-weight: 600; margin-bottom: 4px; font-size: 0.9rem;">Mission ${i + 1}: ${v.missionType}</div>
-                                    <div class="label" style="font-size: 0.75rem;">${v.node}</div>
-                                    <div class="blue" style="font-size: 0.8rem; margin-top: 4px;">⚠️ ${v.modifier}</div>
-                                </div>
-                            `).join('')}
-                        </div>
+                        ${s.variants && s.variants.length > 0 ? `
+                            <div style="margin-bottom: 10px;">
+                                ${s.variants.map((v, i) => `
+                                    <div class="mission-item">
+                                        <div style="font-weight: 600; margin-bottom: 4px; font-size: 0.9rem;">Mission ${i + 1}: ${v.missionType || 'Unknown'}</div>
+                                        <div class="label" style="font-size: 0.75rem;">${v.node || 'Unknown Location'}</div>
+                                        <div class="blue" style="font-size: 0.8rem; margin-top: 4px;">⚠️ ${v.modifier || v.modifierDescription || 'No Modifier'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
                         <div class="divider">
                             <div style="display: flex; justify-content: space-between;">
                                 <span class="label">Resets In</span>
-                                <span class="time-remaining" data-expiry="${sortie.expiry}">${formatTimeRemaining(sortie.expiry)}</span>
+                                <span class="time-remaining" data-expiry="${s.expiry}">${formatTimeRemaining(s.expiry)}</span>
                             </div>
                         </div>
                     </div>
@@ -1054,18 +751,20 @@
                     </div>
                     <div class="content-box">
                         <div style="margin-bottom: 12px;">
-                            <div class="label">Target Archon</div>
-                            <div class="value">${ah.boss}</div>
-                            <div class="label" style="margin-top: 4px;">${ah.faction}</div>
+                            <div class="label">Target</div>
+                            <div class="value">${ah.boss || 'Unknown Archon'}</div>
+                            <div class="label" style="margin-top: 4px;">${ah.faction || 'Unknown Faction'}</div>
                         </div>
-                        <div style="margin-bottom: 10px;">
-                            ${ah.missions?.map((m, i) => `
-                                <div class="mission-item">
-                                    <div style="font-weight: 600; font-size: 0.9rem;">Mission ${i + 1}: ${m.type}</div>
-                                    <div class="label" style="font-size: 0.75rem;">${m.node}</div>
-                                </div>
-                            `).join('')}
-                        </div>
+                        ${ah.missions && ah.missions.length > 0 ? `
+                            <div style="margin-bottom: 10px;">
+                                ${ah.missions.map((m, i) => `
+                                    <div class="mission-item">
+                                        <div style="font-weight: 600; font-size: 0.9rem;">Mission ${i + 1}: ${m.type || 'Unknown'}</div>
+                                        <div class="label" style="font-size: 0.75rem;">${m.node || 'Unknown Location'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
                         <div class="divider">
                             <div style="display: flex; justify-content: space-between;">
                                 <span class="label">Resets In</span>
@@ -1077,10 +776,74 @@
             `;
         }
 
-        function renderInvasions(invasions) {
-            const filtered = invasions.filter(inv => matchesSearch(`invasion ${inv.node}`));
-            if (filtered.length === 0) return '';
+        function renderArbitration() {
+            const arb = gameData.arbitration;
+            if (!arb) return '';
+
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🛡️</div>
+                        <div class="card-title">Arbitration</div>
+                    </div>
+                    <div class="content-box">
+                        <div style="margin-bottom: 12px;">
+                            <div class="label">Mission</div>
+                            <div class="value">${arb.node || 'Loading...'}</div>
+                            <div class="label" style="margin-top: 4px;">${arb.type || 'Unknown Type'}</div>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <div class="label">Enemy</div>
+                            <div class="value">${arb.enemy || 'Unknown'}</div>
+                        </div>
+                        ${arb.archwing !== undefined ? `
+                            <div class="label" style="margin-bottom: 12px;">
+                                ${arb.archwing ? '✓ Archwing Required' : '✗ No Archwing'}
+                            </div>
+                        ` : ''}
+                        <div class="divider">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span class="label">Rotates In</span>
+                                <span class="time-remaining" data-expiry="${arb.expiry}">${formatTimeRemaining(arb.expiry)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSteelPath() {
+            const sp = gameData.steelPath;
+            if (!sp) return '';
             
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">⚔️</div>
+                        <div class="card-title">Steel Path</div>
+                    </div>
+                    <div class="content-box">
+                        ${sp.currentReward ? `
+                            <div style="margin-bottom: 12px;">
+                                <div class="label">Current Reward</div>
+                                <div class="value">${sp.currentReward.name || 'Unknown'}</div>
+                            </div>
+                        ` : ''}
+                        ${sp.remaining ? `
+                            <div class="label">Remaining: ${sp.remaining}</div>
+                        ` : ''}
+                        <div class="divider">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span class="label">Rotates In</span>
+                                <span class="time-remaining" data-expiry="${sp.expiry}">${formatTimeRemaining(sp.expiry)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInvasions(invasions) {
             return `
                 <div class="card">
                     <div class="card-header">
@@ -1088,21 +851,21 @@
                         <div class="card-title">Invasions</div>
                     </div>
                     <div class="scrollable">
-                        ${filtered.map(inv => `
+                        ${invasions.filter(inv => matchesSearch(`invasion ${inv.node}`)).map(inv => `
                             <div class="content-box">
                                 <div class="value" style="font-size: 0.9rem; margin-bottom: 6px;">${inv.node}</div>
                                 <div class="label" style="margin-bottom: 8px; font-size: 0.8rem;">${inv.attackingFaction} vs ${inv.defendingFaction}</div>
                                 <div class="rewards-grid">
                                     <div class="reward-box">
                                         <div class="label" style="font-size: 0.75rem;">Attackers</div>
-                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.attackerReward?.itemString || 'Credits'}</div>
+                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.attackerReward?.itemString || inv.attackerReward?.credits + ' Credits' || 'Unknown'}</div>
                                     </div>
                                     <div class="reward-box">
                                         <div class="label" style="font-size: 0.75rem;">Defenders</div>
-                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.defenderReward?.itemString || 'Credits'}</div>
+                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.defenderReward?.itemString || inv.defenderReward?.credits + ' Credits' || 'Unknown'}</div>
                                     </div>
                                 </div>
-                                <div class="label" style="text-align: center; margin-top: 6px; font-size: 0.8rem;">${inv.completion.toFixed(1)}% Complete</div>
+                                <div class="label" style="text-align: center; margin-top: 6px; font-size: 0.8rem;">${(inv.completion || 0).toFixed(1)}% Complete</div>
                             </div>
                         `).join('')}
                     </div>
@@ -1150,7 +913,7 @@
                         ${vt.active ? `
                             <div style="margin-bottom: 12px;">
                                 <div class="value green" style="margin-bottom: 8px;">✓ Active Now</div>
-                                <div class="value" style="font-size: 0.95rem;">📍 ${vt.location}</div>
+                                <div class="value" style="font-size: 0.95rem;">📍 ${vt.location || 'Unknown Location'}</div>
                             </div>
                             <div class="divider">
                                 <div style="display: flex; justify-content: space-between;">
@@ -1176,7 +939,7 @@
         }
 
         function renderAlerts() {
-            const filtered = gameData.alerts.filter(a => matchesSearch(`alert ${a.mission.node}`));
+            const filtered = gameData.alerts.filter(a => matchesSearch(`alert ${a.mission?.node || ''}`));
             if (filtered.length === 0) return '';
             
             return `
@@ -1188,14 +951,16 @@
                     <div class="scrollable">
                         ${filtered.map(alert => `
                             <div class="content-box">
-                                <div class="value" style="font-size: 0.9rem; margin-bottom: 6px;">${alert.mission.node}</div>
-                                <div class="label" style="margin-bottom: 8px; font-size: 0.8rem;">${alert.mission.type} • ${alert.mission.faction}</div>
-                                <div style="margin-bottom: 8px;">
-                                    <div class="label" style="font-size: 0.75rem;">Rewards</div>
-                                    <div style="font-weight: 600; font-size: 0.85rem;">
-                                        ${alert.mission.reward?.itemString || alert.mission.reward?.credits + ' Credits' || 'Unknown'}
+                                <div class="value" style="font-size: 0.9rem; margin-bottom: 6px;">${alert.mission?.node || 'Unknown'}</div>
+                                <div class="label" style="margin-bottom: 8px; font-size: 0.8rem;">${alert.mission?.type || 'Unknown'} • ${alert.mission?.faction || 'Unknown'}</div>
+                                ${alert.mission?.reward ? `
+                                    <div style="margin-bottom: 8px;">
+                                        <div class="label" style="font-size: 0.75rem;">Rewards</div>
+                                        <div style="font-weight: 600; font-size: 0.85rem;">
+                                            ${alert.mission.reward.itemString || alert.mission.reward.credits + ' Credits' || 'Unknown'}
+                                        </div>
                                     </div>
-                                </div>
+                                ` : ''}
                                 <div class="divider">
                                     <div style="display: flex; justify-content: space-between;">
                                         <span class="label">Expires In</span>
@@ -1209,10 +974,7 @@
             `;
         }
 
-        function renderEvents() {
-            const filtered = gameData.events.filter(e => matchesSearch(`event ${e.description}`));
-            if (filtered.length === 0) return '';
-            
+        function renderEvents(events) {
             return `
                 <div class="card">
                     <div class="card-header">
@@ -1220,23 +982,64 @@
                         <div class="card-title">Events</div>
                     </div>
                     <div class="scrollable">
-                        ${filtered.map(event => `
+                        ${events.map(event => `
                             <div class="content-box">
-                                <div class="value" style="margin-bottom: 8px; font-size: 0.9rem;">${event.description}</div>
-                                ${event.rewards ? `
+                                <div class="value" style="margin-bottom: 8px; font-size: 0.9rem;">${event.description || 'Event Active'}</div>
+                                ${event.rewards && event.rewards.length > 0 ? `
                                     <div style="margin-bottom: 8px;">
                                         <div class="label" style="font-size: 0.75rem;">Rewards</div>
-                                        ${event.rewards.map(r => `<div style="font-size: 0.8rem;">• ${r.itemString}</div>`).join('')}
+                                        ${event.rewards.map(r => `<div style="font-size: 0.8rem;">• ${r.itemString || r}</div>`).join('')}
                                     </div>
                                 ` : ''}
-                                <div class="divider">
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span class="label">Ends In</span>
-                                        <span class="time-remaining" data-expiry="${event.expiry}">${formatTimeRemaining(event.expiry)}</span>
+                                ${event.expiry ? `
+                                    <div class="divider">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span class="label">Ends In</span>
+                                            <span class="time-remaining" data-expiry="${event.expiry}">${formatTimeRemaining(event.expiry)}</span>
+                                        </div>
                                     </div>
-                                </div>
+                                ` : ''}
                             </div>
                         `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNightwave() {
+            const nw = gameData.nightwave;
+            if (!nw) return '';
+            
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🌊</div>
+                        <div class="card-title">Nightwave</div>
+                    </div>
+                    <div class="content-box">
+                        ${nw.season ? `
+                            <div style="margin-bottom: 12px;">
+                                <div class="label">Season</div>
+                                <div class="value">Season ${nw.season}</div>
+                            </div>
+                        ` : ''}
+                        ${nw.tag ? `
+                            <div style="margin-bottom: 12px;">
+                                <div class="label">Current Phase</div>
+                                <div class="value" style="font-size: 0.9rem;">${nw.tag}</div>
+                            </div>
+                        ` : ''}
+                        ${nw.phase !== undefined ? `
+                            <div class="label" style="margin-bottom: 12px;">Phase ${nw.phase}</div>
+                        ` : ''}
+                        ${nw.expiry ? `
+                            <div class="divider">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="label">Ends In</span>
+                                    <span class="time-remaining" data-expiry="${nw.expiry}">${formatTimeRemaining(nw.expiry)}</span>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -1260,10 +1063,7 @@
         }
 
         // Initialize
-        updateStatus(isOnline);
-        if (!loadFromCache()) {
-            fetchData();
-        }
+        fetchData();
         setInterval(fetchData, 60000);
         startTimeUpdates();
     </script>
