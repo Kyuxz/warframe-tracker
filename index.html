@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
-    <title>Warframe Activity Tracker</title>
+    <title>Warframe World State Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,18 +14,36 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --bg-card-hover: #252525;
+            --accent-gold: #c9a227;
+            --accent-blue: #00bfff;
+            --accent-green: #4ade80;
+            --accent-red: #ef4444;
+            --accent-orange: #f97316;
+            --accent-purple: #a855f7;
+            --text-primary: #e5e5e5;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-color: #2d2d2d;
+            --glow-gold: 0 0 20px rgba(201, 162, 39, 0.3);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            color: #fff;
-            overflow-x: hidden;
+            line-height: 1.6;
         }
 
         .header {
-            background: #0a0a0a;
-            border-bottom: 2px solid #1a1a1a;
-            padding: 15px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #0a0a0a 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -33,223 +53,545 @@
         .header-content {
             max-width: 1600px;
             margin: 0 auto;
-        }
-
-        .title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse-dot 2s infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 8px;
-            align-items: center;
+            justify-content: space-between;
             flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-gold), #b8860b);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            min-width: 250px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            font-size: 1.2rem;
         }
 
         .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 16px;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.95rem;
-            transition: all 0.3s;
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            border-color: var(--accent-gold);
+            box-shadow: var(--glow-gold);
         }
 
-        .refresh-btn, .clear-btn {
-            padding: 10px 20px;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
+        .search-input::placeholder {
+            color: var(--text-muted);
         }
 
-        .refresh-btn:hover, .clear-btn:hover {
-            background: #333;
-            transform: translateY(-2px);
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        .container {
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-container {
             max-width: 1600px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 2rem;
         }
 
-        .grid {
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
         }
 
         .card {
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.3s;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .card:hover {
-            border-color: #333;
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-gold);
+            box-shadow: var(--glow-gold);
+            transform: translateY(-2px);
+        }
+
+        .card.hidden {
+            display: none;
         }
 
         .card-header {
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, rgba(201, 162, 39, 0.1) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #1a1a1a;
-        }
-
-        .card-icon {
-            font-size: 22px;
+            justify-content: space-between;
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.25rem;
             font-weight: 600;
-            color: #fff;
-        }
-
-        .content-box {
-            background: #000;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #1a1a1a;
-            margin-bottom: 10px;
-            transition: all 0.2s;
-        }
-
-        .content-box:hover {
-            background: #0a0a0a;
-            border-color: #333;
-        }
-
-        .scrollable {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .scrollable::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .scrollable::-webkit-scrollbar-track {
-            background: #000;
-        }
-
-        .scrollable::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-
-        .tier-filters {
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .tier-btn {
-            padding: 6px 12px;
-            background: #1a1a1a;
-            border: 1px solid #333;
+        .card-timer {
+            background: rgba(0, 191, 255, 0.15);
+            color: var(--accent-blue);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .card-content {
+            padding: 1.25rem;
+        }
+
+        .env-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .env-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .env-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .env-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .env-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .env-state {
+            padding: 0.25rem 0.625rem;
             border-radius: 6px;
-            color: #666;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .env-state.day { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .env-state.night { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .env-state.cold { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+        .env-state.warm { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .env-state.fass { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .env-state.vome { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+
+        .env-timer {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .mission-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mission-item {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-gold);
+            transition: all 0.2s ease;
+        }
+
+        .mission-item:hover {
+            background: var(--bg-card-hover);
+            border-left-color: var(--accent-blue);
+        }
+
+        .mission-type {
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
         }
 
-        .tier-btn:hover {
-            background: #333;
+        .mission-details {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
         }
 
-        .tier-btn.active {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
-        }
-
-        .badge {
+        .mission-faction {
             display: inline-block;
-            padding: 3px 8px;
+            padding: 0.125rem 0.5rem;
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
             border-radius: 4px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            margin-right: 5px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .mission-location {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .mission-timer {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .fissure-grid {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .fissure-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .fissure-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .fissure-tier {
+            min-width: 70px;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-align: center;
             text-transform: uppercase;
         }
 
-        .badge.lith, .badge.meso, .badge.neo, .badge.axi, .badge.requiem, .badge.omnia {
-            background: #666;
-            color: #000;
+        .fissure-tier.lith { background: rgba(180, 83, 9, 0.2); color: #d97706; }
+        .fissure-tier.meso { background: rgba(234, 179, 8, 0.2); color: #eab308; }
+        .fissure-tier.neo { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .fissure-tier.axi { background: rgba(14, 165, 233, 0.2); color: #0ea5e9; }
+        .fissure-tier.requiem { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+        .fissure-tier.omnia { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+
+        .fissure-info {
+            flex: 1;
         }
 
-        .badge.storm { background: #4a90e2; }
-
-        .time-remaining {
-            color: #4a90e2;
-            font-weight: 600;
+        .fissure-mission {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.125rem;
         }
 
-        .label {
-            color: #666;
+        .fissure-location {
             font-size: 0.85rem;
-            margin-bottom: 4px;
+            color: var(--text-muted);
         }
 
-        .value {
-            color: #fff;
-            font-weight: 600;
-            font-size: 1rem;
+        .fissure-timer {
+            font-size: 0.875rem;
+            color: var(--accent-blue);
+            font-family: 'Rajdhani', sans-serif;
         }
 
-        .green { color: #10b981; }
-        .red { color: #dc2626; }
-        .blue { color: #4a90e2; }
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
 
-        .mission-item {
-            background: #000;
-            padding: 10px;
+        .news-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .news-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .news-date {
+            min-width: 40px;
+            padding: 0.25rem 0.5rem;
+            background: rgba(201, 162, 39, 0.15);
+            color: var(--accent-gold);
             border-radius: 6px;
-            border: 1px solid #1a1a1a;
-            margin-bottom: 8px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .news-title {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .invasion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .invasion-item {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+
+        .invasion-node {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .invasion-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .invasion-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .invasion-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+            transition: width 0.3s ease;
+        }
+
+        .invasion-rewards {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .sortie-mission {
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .sortie-mission:last-child {
+            margin-bottom: 0;
+        }
+
+        .sortie-type {
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .sortie-modifier {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .darvo-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+
+        .darvo-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .darvo-info {
+            flex: 1;
+        }
+
+        .darvo-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .darvo-stock {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .darvo-price {
+            text-align: right;
+        }
+
+        .darvo-original {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .darvo-discount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .darvo-percent {
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            background: rgba(74, 222, 128, 0.15);
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        .baro-status {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .baro-location {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .baro-countdown {
+            font-size: 1.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--accent-gold);
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(201, 162, 39, 0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-gold);
+        }
+
+        .event-name {
+            flex: 1;
+            font-weight: 500;
+            color: var(--text-primary);
         }
 
         .loading {
@@ -257,815 +599,349 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 60vh;
-            font-size: 1.3rem;
-            gap: 20px;
+            padding: 3rem;
+            color: var(--text-muted);
         }
 
-        .loading::after {
-            content: '';
+        .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid #333;
-            border-top-color: #fff;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-gold);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .divider {
-            border-top: 1px solid #1a1a1a;
-            padding-top: 8px;
-            margin-top: 8px;
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
         }
 
-        .info-note {
-            background: #1a1a1a;
-            border-left: 3px solid #4a90e2;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: #666;
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
 
-        .rewards-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 8px 0;
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
         }
 
-        .reward-box {
-            padding: 8px;
-            border-radius: 6px;
-            background: #1a1a1a;
-            border: 1px solid #333;
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
         }
 
-        .cycle-box {
-            background: #000;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #1a1a1a;
-            margin-bottom: 10px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
         }
 
-        .cycle-header {
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--bg-secondary);
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-tab {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .filter-tab:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .filter-tab.active {
+            background: rgba(201, 162, 39, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .archon-boss {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .archon-missions {
+            color: var(--text-secondary);
+        }
+
+        .steel-path-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .steel-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
         }
 
-        .weapon-item {
-            background: #1a1a1a;
-            padding: 8px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 6px;
-            border: 1px solid #333;
+        .steel-mission {
+            font-weight: 500;
+            color: var(--text-primary);
         }
 
-        .weapon-number {
-            width: 24px;
-            height: 24px;
-            background: #333;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .steel-location {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .steel-level {
             font-size: 0.8rem;
-            font-weight: 700;
-            margin-right: 10px;
-            color: #fff;
-        }
-
-        .error {
-            text-align: center;
-            padding: 30px;
-            color: #dc2626;
-        }
-
-        .cache-indicator {
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 5px;
+            color: var(--accent-purple);
         }
 
         @media (max-width: 768px) {
-            .grid {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .logo {
+                justify-content: center;
+            }
+
+            .search-container {
+                max-width: 100%;
+            }
+
+            .status-bar {
+                justify-content: center;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
+    <header class="header">
         <div class="header-content">
-            <div class="title">
-                <span>⚡ WARFRAME TRACKER</span>
-                <div class="status-indicator" id="statusDot"></div>
+            <div class="logo">
+                <div class="logo-icon">⚔</div>
+                Warframe Tracker
             </div>
-            <div class="search-bar">
-                <input 
-                    type="text" 
-                    class="search-input" 
-                    id="searchInput" 
-                    placeholder="Search activities, missions, rewards..."
-                />
-                <button class="refresh-btn" onclick="fetchData()">🔄 Refresh</button>
-                <button class="clear-btn" onclick="clearSearch()">✕ Clear</button>
+            
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        id="searchInput"
+                        placeholder="Search missions, fissures, alerts..."
+                        autocomplete="off"
+                    >
+                </div>
             </div>
-            <div class="cache-indicator" id="cacheInfo"></div>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot"></span>
+                    <span>Live Data</span>
+                </div>
+                <div class="status-item" id="lastUpdate">
+                    Updated: --
+                </div>
+            </div>
         </div>
+    </header>
+
+    <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="environments">Environments</button>
+        <button class="filter-tab" data-filter="fissures">Void Fissures</button>
+        <button class="filter-tab" data-filter="missions">Missions</button>
+        <button class="filter-tab" data-filter="invasions">Invasions</button>
+        <button class="filter-tab" data-filter="events">Events & Alerts</button>
     </div>
-    
-    <div id="app"></div>
+
+    <main class="main-container">
+        <div class="dashboard-grid" id="dashboard">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <span>Loading world state...</span>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const API_BASE = 'https://api.warframestat.us/pc';
+        const API_URL = 'https://api.warframestat.us/pc';
+        let worldState = null;
 
-        const INCARNON_ROTATION = [
-            { week: 1, weapons: ['Braton', 'Lato', 'Skana', 'Paris', 'Kunai'] },
-            { week: 2, weapons: ['Boar', 'Gammacor', 'Angstrum', 'Gorgon', 'Anku'] },
-            { week: 3, weapons: ['Bo', 'Latron', 'Furis', 'Furax', 'Strun'] },
-            { week: 4, weapons: ['Lex', 'Magistar', 'Boltor', 'Bronco', 'Ceramic Dagger'] },
-            { week: 5, weapons: ['Torid', 'Dual Toxocyst', 'Dual Ichor', 'Miter'] },
-            { week: 6, weapons: ['Ack & Brunt', 'Soma', 'Vasto', 'Nami Solo', 'Burston'] },
-            { week: 7, weapons: ['Zylok', 'Sibear', 'Dread', 'Despair', 'Hate'] },
-            { week: 8, weapons: ['Dera', 'Sybaris', 'Cestra', 'Sicarus', 'Okina'] },
-        ];
-
-        let selectedTier = 'all';
-        let gameData = null;
-        let searchQuery = '';
-
-        document.getElementById('searchInput')?.addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase().trim();
-            render();
-        });
-
-        function clearSearch() {
-            searchQuery = '';
-            document.getElementById('searchInput').value = '';
-            render();
+        function formatTime(seconds) {
+            if (!seconds || seconds < 0) return 'Expired';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            if (h > 0) return `${h}h ${m}m`;
+            if (m > 0) return `${m}m ${s}s`;
+            return `${s}s`;
         }
 
-        function formatTimeRemaining(expiry) {
+        function getTimeRemaining(expiry) {
+            if (!expiry) return 0;
+            const now = new Date().getTime();
+            const end = new Date(expiry).getTime();
+            return Math.floor((end - now) / 1000);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
             const now = new Date();
-            const end = new Date(expiry);
-            const diff = end - now;
-
-            if (diff <= 0) return 'Expired';
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            
-            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-            if (hours > 0) return `${hours}h ${minutes}m`;
-            return `${minutes}m`;
+            const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            if (diff === 0) return 'Today';
+            if (diff === 1) return '1d';
+            return `${diff}d`;
         }
 
-        function getCurrentIncarnonWeek() {
-            const startDate = new Date('2024-10-07T00:00:00Z');
-            const now = new Date();
-            const diffTime = now - startDate;
-            const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
-            const currentWeek = (diffWeeks % 8) + 1;
-            return INCARNON_ROTATION.find(r => r.week === currentWeek);
+        function capitalize(str) {
+            return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
         }
 
-        function matchesSearch(text) {
-            if (!searchQuery) return true;
-            return text.toLowerCase().includes(searchQuery);
-        }
-
-        async function fetchData() {
-            document.getElementById('app').innerHTML = '<div class="loading">Loading Warframe Data...</div>';
-
+        async function fetchWorldState() {
             try {
-                const responses = await Promise.all([
-                    fetch(`${API_BASE}/fissures`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/invasions`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/sortie`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/voidTrader`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/archonHunt`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/cetusCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/vallisCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/cambionCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/earthCycle`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/alerts`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/events`).then(r => r.json()).catch(() => []),
-                    fetch(`${API_BASE}/nightwave`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/arbitration`).then(r => r.json()).catch(() => null),
-                    fetch(`${API_BASE}/steelPath`).then(r => r.json()).catch(() => null)
-                ]);
-
-                gameData = {
-                    fissures: responses[0],
-                    invasions: responses[1],
-                    sortie: responses[2],
-                    voidTrader: responses[3],
-                    archonHunt: responses[4],
-                    cetusCycle: responses[5],
-                    vallisCycle: responses[6],
-                    cambionCycle: responses[7],
-                    earthCycle: responses[8],
-                    alerts: responses[9],
-                    events: responses[10],
-                    nightwave: responses[11],
-                    arbitration: responses[12],
-                    steelPath: responses[13]
-                };
-
-                const cacheInfo = document.getElementById('cacheInfo');
-                if (cacheInfo) {
-                    cacheInfo.textContent = `✓ Live data • Last updated: ${new Date().toLocaleTimeString()}`;
-                }
-
-                render();
-            } catch (err) {
-                document.getElementById('app').innerHTML = `
-                    <div class="error">
-                        <div>⚠️ Error Loading Data</div>
-                        <div style="font-size: 1rem; margin-top: 20px;">${err.message}</div>
-                        <button class="refresh-btn" onclick="fetchData()" style="margin-top: 20px;">🔄 Try Again</button>
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Failed to fetch');
+                worldState = await response.json();
+                renderDashboard();
+                updateLastUpdateTime();
+            } catch (error) {
+                console.error('Error fetching world state:', error);
+                document.getElementById('dashboard').innerHTML = `
+                    <div class="empty-state">
+                        <p>Failed to load world state. Please try again later.</p>
+                        <button onclick="fetchWorldState()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--accent-gold); border: none; border-radius: 8px; cursor: pointer; color: black;">Retry</button>
                     </div>
                 `;
             }
         }
 
-        function render() {
-            if (!gameData) return;
-
-            let content = '';
-
-            // Open World Cycles
-            if (matchesSearch('cycle cetus vallis cambion earth')) {
-                content += renderCycles();
-            }
-
-            // Void Fissures
-            const filteredFissures = gameData.fissures.filter(f => 
-                (selectedTier === 'all' || f.tier === selectedTier) &&
-                matchesSearch(`${f.node} ${f.missionType} ${f.tier} ${f.enemy}`)
-            );
-            if (filteredFissures.length > 0) {
-                content += renderVoidFissures(filteredFissures);
-            }
-
-            // Sortie
-            if (gameData.sortie && matchesSearch(`sortie ${gameData.sortie.boss || ''} ${gameData.sortie.faction || ''}`)) {
-                content += renderSortie();
-            }
-
-            // Archon Hunt
-            if (gameData.archonHunt && matchesSearch(`archon ${gameData.archonHunt.boss || ''}`)) {
-                content += renderArchonHunt();
-            }
-
-            // Arbitration
-            if (gameData.arbitration && matchesSearch('arbitration')) {
-                content += renderArbitration();
-            }
-
-            // Steel Path
-            if (gameData.steelPath && matchesSearch('steel path')) {
-                content += renderSteelPath();
-            }
-
-            // Invasions
-            const activeInvasions = gameData.invasions.filter(inv => !inv.completed);
-            if (activeInvasions.length > 0 && activeInvasions.some(inv => matchesSearch(`invasion ${inv.node}`))) {
-                content += renderInvasions(activeInvasions);
-            }
-
-            // Incarnon
-            if (matchesSearch('incarnon circuit')) {
-                content += renderIncarnonRotation(getCurrentIncarnonWeek());
-            }
-
-            // Void Trader
-            if (gameData.voidTrader && matchesSearch('baro void trader')) {
-                content += renderVoidTrader();
-            }
-
-            // Alerts
-            if (gameData.alerts.length > 0 && matchesSearch('alert')) {
-                content += renderAlerts();
-            }
-
-            // Events
-            if (gameData.events.length > 0) {
-                const matchingEvents = gameData.events.filter(e => 
-                    matchesSearch(`event ${e.description || ''}`)
-                );
-                if (matchingEvents.length > 0) {
-                    content += renderEvents(matchingEvents);
-                }
-            }
-
-            // Nightwave
-            if (gameData.nightwave && matchesSearch('nightwave')) {
-                content += renderNightwave();
-            }
-
-            if (!content) {
-                content = `<div class="error">No activities found${searchQuery ? ` for "${searchQuery}"` : ''}</div>`;
-            }
-
-            document.getElementById('app').innerHTML = `<div class="container"><div class="grid">${content}</div></div>`;
-            attachEventListeners();
+        function updateLastUpdateTime() {
+            document.getElementById('lastUpdate').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
         }
 
-        function renderCycles() {
-            const { cetusCycle, vallisCycle, cambionCycle, earthCycle } = gameData;
-            if (!cetusCycle && !vallisCycle && !cambionCycle && !earthCycle) return '';
+        function renderDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = '';
+
+            dashboard.innerHTML += renderEnvironments();
+            dashboard.innerHTML += renderSortie();
+            dashboard.innerHTML += renderArbitration();
+            dashboard.innerHTML += renderArchonHunt();
+            dashboard.innerHTML += renderDarvoDeal();
+            dashboard.innerHTML += renderBaro();
+            dashboard.innerHTML += renderFissures();
+            dashboard.innerHTML += renderSteelPathFissures();
+            dashboard.innerHTML += renderInvasions();
+            dashboard.innerHTML += renderAlerts();
+            dashboard.innerHTML += renderEvents();
+            dashboard.innerHTML += renderNews();
+            dashboard.innerHTML += renderSteelPath();
+            dashboard.innerHTML += renderVoidStorms();
+
+            startTimers();
+        }
+
+        function renderEnvironments() {
+            const environments = [];
             
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🌍</div>
-                        <div class="card-title">Open World Cycles</div>
-                    </div>
-                    ${cetusCycle ? `
-                        <div class="cycle-box">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Plains of Eidolon</span>
-                                <span class="badge" style="background: ${cetusCycle.isDay ? '#f59e0b' : '#3b82f6'};">
-                                    ${cetusCycle.isDay ? '☀️ Day' : '🌙 Night'}
-                                </span>
-                            </div>
-                            <div class="label">
-                                Changes in: <span class="time-remaining" data-expiry="${cetusCycle.expiry}">${formatTimeRemaining(cetusCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${earthCycle ? `
-                        <div class="cycle-box">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Earth</span>
-                                <span class="badge" style="background: ${earthCycle.isDay ? '#f59e0b' : '#3b82f6'};">
-                                    ${earthCycle.isDay ? '☀️ Day' : '🌙 Night'}
-                                </span>
-                            </div>
-                            <div class="label">
-                                Changes in: <span class="time-remaining" data-expiry="${earthCycle.expiry}">${formatTimeRemaining(earthCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${vallisCycle ? `
-                        <div class="cycle-box">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Orb Vallis</span>
-                                <span class="badge" style="background: ${vallisCycle.isWarm ? '#ea580c' : '#06b6d4'};">
-                                    ${vallisCycle.isWarm ? '🔥 Warm' : '❄️ Cold'}
-                                </span>
-                            </div>
-                            <div class="label">
-                                Changes in: <span class="time-remaining" data-expiry="${vallisCycle.expiry}">${formatTimeRemaining(vallisCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${cambionCycle ? `
-                        <div class="cycle-box" style="margin-bottom: 0;">
-                            <div class="cycle-header">
-                                <span style="font-weight: 600;">Cambion Drift</span>
-                                <span class="badge" style="background: #9333ea;">
-                                    ${(cambionCycle.state || cambionCycle.active || 'unknown').toUpperCase()}
-                                </span>
-                            </div>
-                            <div class="label">
-                                Changes in: <span class="time-remaining" data-expiry="${cambionCycle.expiry}">${formatTimeRemaining(cambionCycle.expiry)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-
-        function renderVoidFissures(fissures) {
-            const normalFissures = fissures.filter(f => !f.isHard);
-            const steelFissures = fissures.filter(f => f.isHard);
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">⚡</div>
-                        <div class="card-title">Void Fissures</div>
-                    </div>
-                    <div class="tier-filters">
-                        ${['all', 'Lith', 'Meso', 'Neo', 'Axi', 'Requiem', 'Omnia'].map(tier => `
-                            <button class="tier-btn ${selectedTier === tier ? 'active' : ''}" data-tier="${tier}">
-                                ${tier}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div class="scrollable">
-                        ${normalFissures.length > 0 ? '<div style="color: #fff; font-weight: 600; margin-bottom: 10px; font-size: 0.9rem;">Normal Fissures</div>' : ''}
-                        ${normalFissures.map(f => `
-                            <div class="content-box">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 5px;">
-                                    <div>
-                                        <span class="badge ${f.tier.toLowerCase()}">${f.tier}</span>
-                                        ${f.isStorm ? '<span class="badge storm">Storm</span>' : ''}
-                                    </div>
-                                    <span class="time-remaining" data-expiry="${f.expiry}">${formatTimeRemaining(f.expiry)}</span>
-                                </div>
-                                <div class="value" style="font-size: 0.9rem;">${f.node}</div>
-                                <div class="label" style="font-size: 0.8rem;">${f.missionType} • ${f.enemy}</div>
-                            </div>
-                        `).join('')}
-                        ${steelFissures.length > 0 ? '<div style="color: #dc2626; font-weight: 600; margin: 12px 0 8px 0; font-size: 0.9rem;">Steel Path Fissures</div>' : ''}
-                        ${steelFissures.map(f => `
-                            <div class="content-box" style="border-color: #dc2626;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 5px;">
-                                    <div>
-                                        <span class="badge ${f.tier.toLowerCase()}">${f.tier}</span>
-                                        <span class="badge" style="background: #dc2626;">Steel</span>
-                                        ${f.isStorm ? '<span class="badge storm">Storm</span>' : ''}
-                                    </div>
-                                    <span class="time-remaining" data-expiry="${f.expiry}">${formatTimeRemaining(f.expiry)}</span>
-                                </div>
-                                <div class="value" style="font-size: 0.9rem;">${f.node}</div>
-                                <div class="label" style="font-size: 0.8rem;">${f.missionType} • ${f.enemy}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSortie() {
-            const s = gameData.sortie;
-            if (!s) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🎯</div>
-                        <div class="card-title">Sortie</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Boss</div>
-                            <div class="value">${s.boss || 'Unknown'}</div>
-                            <div class="label" style="margin-top: 4px;">${s.faction || 'Unknown Faction'}</div>
-                        </div>
-                        ${s.variants && s.variants.length > 0 ? `
-                            <div style="margin-bottom: 10px;">
-                                ${s.variants.map((v, i) => `
-                                    <div class="mission-item">
-                                        <div style="font-weight: 600; margin-bottom: 4px; font-size: 0.9rem;">Mission ${i + 1}: ${v.missionType || 'Unknown'}</div>
-                                        <div class="label" style="font-size: 0.75rem;">${v.node || 'Unknown Location'}</div>
-                                        <div class="blue" style="font-size: 0.8rem; margin-top: 4px;">⚠️ ${v.modifier || v.modifierDescription || 'No Modifier'}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Resets In</span>
-                                <span class="time-remaining" data-expiry="${s.expiry}">${formatTimeRemaining(s.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderArchonHunt() {
-            const ah = gameData.archonHunt;
-            if (!ah) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">👹</div>
-                        <div class="card-title">Archon Hunt</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Target</div>
-                            <div class="value">${ah.boss || 'Unknown Archon'}</div>
-                            <div class="label" style="margin-top: 4px;">${ah.faction || 'Unknown Faction'}</div>
-                        </div>
-                        ${ah.missions && ah.missions.length > 0 ? `
-                            <div style="margin-bottom: 10px;">
-                                ${ah.missions.map((m, i) => `
-                                    <div class="mission-item">
-                                        <div style="font-weight: 600; font-size: 0.9rem;">Mission ${i + 1}: ${m.type || 'Unknown'}</div>
-                                        <div class="label" style="font-size: 0.75rem;">${m.node || 'Unknown Location'}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Resets In</span>
-                                <span class="time-remaining" data-expiry="${ah.expiry}">${formatTimeRemaining(ah.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderArbitration() {
-            const arb = gameData.arbitration;
-            if (!arb) return '';
-
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🛡️</div>
-                        <div class="card-title">Arbitration</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Mission</div>
-                            <div class="value">${arb.node || 'Loading...'}</div>
-                            <div class="label" style="margin-top: 4px;">${arb.type || 'Unknown Type'}</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            <div class="label">Enemy</div>
-                            <div class="value">${arb.enemy || 'Unknown'}</div>
-                        </div>
-                        ${arb.archwing !== undefined ? `
-                            <div class="label" style="margin-bottom: 12px;">
-                                ${arb.archwing ? '✓ Archwing Required' : '✗ No Archwing'}
-                            </div>
-                        ` : ''}
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Rotates In</span>
-                                <span class="time-remaining" data-expiry="${arb.expiry}">${formatTimeRemaining(arb.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSteelPath() {
-            const sp = gameData.steelPath;
-            if (!sp) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">⚔️</div>
-                        <div class="card-title">Steel Path</div>
-                    </div>
-                    <div class="content-box">
-                        ${sp.currentReward ? `
-                            <div style="margin-bottom: 12px;">
-                                <div class="label">Current Reward</div>
-                                <div class="value">${sp.currentReward.name || 'Unknown'}</div>
-                            </div>
-                        ` : ''}
-                        ${sp.remaining ? `
-                            <div class="label">Remaining: ${sp.remaining}</div>
-                        ` : ''}
-                        <div class="divider">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="label">Rotates In</span>
-                                <span class="time-remaining" data-expiry="${sp.expiry}">${formatTimeRemaining(sp.expiry)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderInvasions(invasions) {
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">⚔️</div>
-                        <div class="card-title">Invasions</div>
-                    </div>
-                    <div class="scrollable">
-                        ${invasions.filter(inv => matchesSearch(`invasion ${inv.node}`)).map(inv => `
-                            <div class="content-box">
-                                <div class="value" style="font-size: 0.9rem; margin-bottom: 6px;">${inv.node}</div>
-                                <div class="label" style="margin-bottom: 8px; font-size: 0.8rem;">${inv.attackingFaction} vs ${inv.defendingFaction}</div>
-                                <div class="rewards-grid">
-                                    <div class="reward-box">
-                                        <div class="label" style="font-size: 0.75rem;">Attackers</div>
-                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.attackerReward?.itemString || inv.attackerReward?.credits + ' Credits' || 'Unknown'}</div>
-                                    </div>
-                                    <div class="reward-box">
-                                        <div class="label" style="font-size: 0.75rem;">Defenders</div>
-                                        <div style="font-weight: 600; font-size: 0.8rem;">${inv.defenderReward?.itemString || inv.defenderReward?.credits + ' Credits' || 'Unknown'}</div>
-                                    </div>
-                                </div>
-                                <div class="label" style="text-align: center; margin-top: 6px; font-size: 0.8rem;">${(inv.completion || 0).toFixed(1)}% Complete</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderIncarnonRotation(week) {
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">📈</div>
-                        <div class="card-title">Incarnon Rotation</div>
-                    </div>
-                    <div class="content-box">
-                        <div style="margin-bottom: 14px;">
-                            <div class="value" style="font-size: 1.1rem;">Week ${week.week} of 8</div>
-                            <div class="label" style="margin-top: 4px;">Steel Path Circuit Rewards</div>
-                        </div>
-                        ${week.weapons.map((w, i) => `
-                            <div class="weapon-item">
-                                <div class="weapon-number">${i + 1}</div>
-                                <span style="font-weight: 600; font-size: 0.9rem;">${w}</span>
-                            </div>
-                        `).join('')}
-                        <div class="info-note">
-                            💡 Pick 2 Incarnon Adapters at Circuit Rank 5 and 10
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderVoidTrader() {
-            const vt = gameData.voidTrader;
-            if (!vt) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🎭</div>
-                        <div class="card-title">Baro Ki'Teer</div>
-                    </div>
-                    <div class="content-box">
-                        ${vt.active ? `
-                            <div style="margin-bottom: 12px;">
-                                <div class="value green" style="margin-bottom: 8px;">✓ Active Now</div>
-                                <div class="value" style="font-size: 0.95rem;">📍 ${vt.location || 'Unknown Location'}</div>
-                            </div>
-                            <div class="divider">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span class="label">Leaves In</span>
-                                    <span class="time-remaining" data-expiry="${vt.expiry}">${formatTimeRemaining(vt.expiry)}</span>
-                                </div>
-                            </div>
-                        ` : `
-                            <div style="margin-bottom: 12px;">
-                                <div class="value" style="color: #666; margin-bottom: 8px;">Away</div>
-                                <div class="label">Not currently visiting</div>
-                            </div>
-                            <div class="divider">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span class="label">Arrives In</span>
-                                    <span class="time-remaining" data-expiry="${vt.activation}">${formatTimeRemaining(vt.activation)}</span>
-                                </div>
-                            </div>
-                        `}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderAlerts() {
-            const filtered = gameData.alerts.filter(a => matchesSearch(`alert ${a.mission?.node || ''}`));
-            if (filtered.length === 0) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🚨</div>
-                        <div class="card-title">Alerts</div>
-                    </div>
-                    <div class="scrollable">
-                        ${filtered.map(alert => `
-                            <div class="content-box">
-                                <div class="value" style="font-size: 0.9rem; margin-bottom: 6px;">${alert.mission?.node || 'Unknown'}</div>
-                                <div class="label" style="margin-bottom: 8px; font-size: 0.8rem;">${alert.mission?.type || 'Unknown'} • ${alert.mission?.faction || 'Unknown'}</div>
-                                ${alert.mission?.reward ? `
-                                    <div style="margin-bottom: 8px;">
-                                        <div class="label" style="font-size: 0.75rem;">Rewards</div>
-                                        <div style="font-weight: 600; font-size: 0.85rem;">
-                                            ${alert.mission.reward.itemString || alert.mission.reward.credits + ' Credits' || 'Unknown'}
-                                        </div>
-                                    </div>
-                                ` : ''}
-                                <div class="divider">
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span class="label">Expires In</span>
-                                        <span class="time-remaining" data-expiry="${alert.expiry}">${formatTimeRemaining(alert.expiry)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderEvents(events) {
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🎉</div>
-                        <div class="card-title">Events</div>
-                    </div>
-                    <div class="scrollable">
-                        ${events.map(event => `
-                            <div class="content-box">
-                                <div class="value" style="margin-bottom: 8px; font-size: 0.9rem;">${event.description || 'Event Active'}</div>
-                                ${event.rewards && event.rewards.length > 0 ? `
-                                    <div style="margin-bottom: 8px;">
-                                        <div class="label" style="font-size: 0.75rem;">Rewards</div>
-                                        ${event.rewards.map(r => `<div style="font-size: 0.8rem;">• ${r.itemString || r}</div>`).join('')}
-                                    </div>
-                                ` : ''}
-                                ${event.expiry ? `
-                                    <div class="divider">
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span class="label">Ends In</span>
-                                            <span class="time-remaining" data-expiry="${event.expiry}">${formatTimeRemaining(event.expiry)}</span>
-                                        </div>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderNightwave() {
-            const nw = gameData.nightwave;
-            if (!nw) return '';
-            
-            return `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🌊</div>
-                        <div class="card-title">Nightwave</div>
-                    </div>
-                    <div class="content-box">
-                        ${nw.season ? `
-                            <div style="margin-bottom: 12px;">
-                                <div class="label">Season</div>
-                                <div class="value">Season ${nw.season}</div>
-                            </div>
-                        ` : ''}
-                        ${nw.tag ? `
-                            <div style="margin-bottom: 12px;">
-                                <div class="label">Current Phase</div>
-                                <div class="value" style="font-size: 0.9rem;">${nw.tag}</div>
-                            </div>
-                        ` : ''}
-                        ${nw.phase !== undefined ? `
-                            <div class="label" style="margin-bottom: 12px;">Phase ${nw.phase}</div>
-                        ` : ''}
-                        ${nw.expiry ? `
-                            <div class="divider">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span class="label">Ends In</span>
-                                    <span class="time-remaining" data-expiry="${nw.expiry}">${formatTimeRemaining(nw.expiry)}</span>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        function attachEventListeners() {
-            document.querySelectorAll('.tier-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    selectedTier = btn.dataset.tier;
-                    render();
+            if (worldState.earthCycle) {
+                environments.push({
+                    name: 'Plains of Eidolon / Earth',
+                    state: worldState.earthCycle.isDay ? 'day' : 'night',
+                    expiry: worldState.earthCycle.expiry
                 });
-            });
-        }
-
-        function startTimeUpdates() {
-            setInterval(() => {
-                document.querySelectorAll('[data-expiry]').forEach(el => {
-                    el.textContent = formatTimeRemaining(el.dataset.expiry);
+            }
+            
+            if (worldState.vallisCycle) {
+                environments.push({
+                    name: 'Orb Vallis',
+                    state: worldState.vallisCycle.isWarm ? 'warm' : 'cold',
+                    expiry: worldState.vallisCycle.expiry
                 });
-            }, 30000);
-        }
+            }
+            
+            if (worldState.cambionCycle) {
+                environments.push({
+                    name: 'Cambion Drift',
+                    state: (worldState.cambionCycle.active || '').toLowerCase() || 'unknown',
+                    expiry: worldState.cambionCycle.expiry
+                });
+            }
+            
+            if (worldState.duviriCycle) {
+                environments.push({
+                    name: 'Duviri',
+                    state: worldState.duviriCycle.state || 'unknown',
+                    expiry: worldState.duviriCycle.expiry
+                });
+            }
+            
+            if (worldState.zarimanCycle) {
+                environments.push({
+                    name: 'Zariman',
+                    state: worldState.zarimanCycle.state || 'unknown',
+                    expiry: worldState.zarimanCycle.expiry
+                });
+            }
 
-        // Initialize
-        fetchData();
-        setInterval(fetchData, 60000);
-        startTimeUpdates();
-    </script>
-</body>
-</html>
+            if (environments.length === 0) return '';
+
+            return `
+                <div class="card" data-category="environments" data-search="environments plains eidolon orb vallis cambion drift duviri zariman earth cycle">
+                    <div class="card-header">
+                        <h2 class="card-title">🌍 Environments</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="env-grid">
+                            ${environments.map(env => `
+                                <div class="env-item">
+                                    <span class="env-name">${env.name}</span>
+                                    <div class="env-status">
+                                        <span class="env-state ${env.state}">${capitalize(env.state)}</span>
+                                        <span class="env-timer" data-timer="${env.expiry}">${formatTime(getTimeRemaining(env.expiry))}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
