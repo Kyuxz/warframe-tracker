@@ -40,6 +40,7 @@
             line-height: 1.6;
         }
 
+        /* Header */
         .header {
             background: linear-gradient(135deg, var(--bg-secondary) 0%, #0a0a0a 100%);
             border-bottom: 1px solid var(--border-color);
@@ -83,6 +84,7 @@
             font-size: 1.5rem;
         }
 
+        /* Search Bar */
         .search-container {
             flex: 1;
             max-width: 500px;
@@ -123,6 +125,7 @@
             color: var(--text-muted);
         }
 
+        /* Status Bar */
         .status-bar {
             display: flex;
             align-items: center;
@@ -151,18 +154,21 @@
             50% { opacity: 0.5; }
         }
 
+        /* Main Content */
         .main-container {
             max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
         }
 
+        /* Grid Layout */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 1.5rem;
         }
 
+        /* Card Styles */
         .card {
             background: var(--bg-card);
             border-radius: 16px;
@@ -216,6 +222,7 @@
             padding: 1.25rem;
         }
 
+        /* Environment Cards */
         .env-grid {
             display: grid;
             gap: 0.75rem;
@@ -267,6 +274,7 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
+        /* Mission Items */
         .mission-list {
             display: flex;
             flex-direction: column;
@@ -320,6 +328,7 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
+        /* Fissure Items */
         .fissure-grid {
             display: grid;
             gap: 0.5rem;
@@ -377,6 +386,7 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
+        /* News Items */
         .news-list {
             display: flex;
             flex-direction: column;
@@ -417,6 +427,7 @@
             line-height: 1.4;
         }
 
+        /* Invasion Items */
         .invasion-list {
             display: flex;
             flex-direction: column;
@@ -463,6 +474,7 @@
             color: var(--text-secondary);
         }
 
+        /* Sortie */
         .sortie-mission {
             padding: 0.75rem 1rem;
             background: var(--bg-secondary);
@@ -485,6 +497,7 @@
             margin-top: 0.25rem;
         }
 
+        /* Darvo Deal */
         .darvo-item {
             display: flex;
             align-items: center;
@@ -546,6 +559,7 @@
             margin-left: 0.5rem;
         }
 
+        /* Baro */
         .baro-status {
             text-align: center;
             padding: 1.5rem;
@@ -563,6 +577,7 @@
             color: var(--accent-gold);
         }
 
+        /* Events */
         .event-item {
             display: flex;
             align-items: center;
@@ -594,6 +609,7 @@
             color: var(--text-primary);
         }
 
+        /* Loading State */
         .loading {
             display: flex;
             flex-direction: column;
@@ -617,12 +633,14 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 2rem;
             color: var(--text-muted);
         }
 
+        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -641,79 +659,7 @@
             background: var(--text-muted);
         }
 
-        .filter-tabs {
-            display: flex;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            background: var(--bg-secondary);
-            overflow-x: auto;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .filter-tab {
-            padding: 0.5rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            font-size: 0.9rem;
-        }
-
-        .filter-tab:hover {
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        .filter-tab.active {
-            background: rgba(201, 162, 39, 0.15);
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        .archon-boss {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .archon-missions {
-            color: var(--text-secondary);
-        }
-
-        .steel-path-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .steel-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-        }
-
-        .steel-mission {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .steel-location {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .steel-level {
-            font-size: 0.8rem;
-            color: var(--accent-purple);
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
@@ -749,6 +695,114 @@
                 align-items: flex-start;
                 gap: 0.5rem;
             }
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--bg-secondary);
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-tab {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .filter-tab:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .filter-tab.active {
+            background: rgba(201, 162, 39, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        /* Archon Hunt */
+        .archon-boss {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .archon-missions {
+            color: var(--text-secondary);
+        }
+
+        /* Steel Path */
+        .steel-path-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .steel-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+
+        .steel-mission {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .steel-location {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .steel-level {
+            font-size: 0.8rem;
+            color: var(--accent-purple);
+        }
+
+        /* Bounty table */
+        .bounty-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bounty-table th,
+        .bounty-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .bounty-table th {
+            color: var(--accent-gold);
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .bounty-table td {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .bounty-table tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .bounty-table tr:last-child td {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -806,26 +860,26 @@
     <script>
         const API_URL = 'https://api.warframestat.us/pc';
         let worldState = null;
+        let timers = {};
 
+        // Utility functions
         function formatTime(seconds) {
-            if (!seconds || seconds < 0) return 'Expired';
+            if (seconds < 0) return 'Expired';
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = Math.floor(seconds % 60);
-            if (h > 0) return `${h}h ${m}m`;
+            if (h > 0) return `${h}h ${m}m ${s}s`;
             if (m > 0) return `${m}m ${s}s`;
             return `${s}s`;
         }
 
         function getTimeRemaining(expiry) {
-            if (!expiry) return 0;
             const now = new Date().getTime();
             const end = new Date(expiry).getTime();
             return Math.floor((end - now) / 1000);
         }
 
         function formatDate(dateStr) {
-            if (!dateStr) return 'Unknown';
             const date = new Date(dateStr);
             const now = new Date();
             const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
@@ -838,6 +892,7 @@
             return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
         }
 
+        // Fetch world state
         async function fetchWorldState() {
             try {
                 const response = await fetch(API_URL);
@@ -860,23 +915,51 @@
             document.getElementById('lastUpdate').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
         }
 
+        // Render functions
         function renderDashboard() {
             const dashboard = document.getElementById('dashboard');
             dashboard.innerHTML = '';
 
+            // Environments
             dashboard.innerHTML += renderEnvironments();
+            
+            // Sortie
             dashboard.innerHTML += renderSortie();
+            
+            // Arbitration
             dashboard.innerHTML += renderArbitration();
+            
+            // Archon Hunt
             dashboard.innerHTML += renderArchonHunt();
+            
+            // Darvo Deal
             dashboard.innerHTML += renderDarvoDeal();
+            
+            // Baro Ki'Teer
             dashboard.innerHTML += renderBaro();
+            
+            // Void Fissures
             dashboard.innerHTML += renderFissures();
+            
+            // Steel Path Fissures
             dashboard.innerHTML += renderSteelPathFissures();
+            
+            // Invasions
             dashboard.innerHTML += renderInvasions();
+            
+            // Alerts
             dashboard.innerHTML += renderAlerts();
+            
+            // Events
             dashboard.innerHTML += renderEvents();
+            
+            // News
             dashboard.innerHTML += renderNews();
+            
+            // Steel Path Incursions
             dashboard.innerHTML += renderSteelPath();
+            
+            // Void Storms
             dashboard.innerHTML += renderVoidStorms();
 
             startTimers();
@@ -904,7 +987,7 @@
             if (worldState.cambionCycle) {
                 environments.push({
                     name: 'Cambion Drift',
-                    state: (worldState.cambionCycle.active || '').toLowerCase() || 'unknown',
+                    state: worldState.cambionCycle.active.toLowerCase(),
                     expiry: worldState.cambionCycle.expiry
                 });
             }
@@ -912,7 +995,7 @@
             if (worldState.duviriCycle) {
                 environments.push({
                     name: 'Duviri',
-                    state: worldState.duviriCycle.state || 'unknown',
+                    state: worldState.duviriCycle.state,
                     expiry: worldState.duviriCycle.expiry
                 });
             }
@@ -920,12 +1003,10 @@
             if (worldState.zarimanCycle) {
                 environments.push({
                     name: 'Zariman',
-                    state: worldState.zarimanCycle.state || 'unknown',
+                    state: worldState.zarimanCycle.state,
                     expiry: worldState.zarimanCycle.expiry
                 });
             }
-
-            if (environments.length === 0) return '';
 
             return `
                 <div class="card" data-category="environments" data-search="environments plains eidolon orb vallis cambion drift duviri zariman earth cycle">
@@ -945,3 +1026,438 @@
                             `).join('')}
                         </div>
                     </div>
+                </div>
+            `;
+        }
+
+        function renderSortie() {
+            if (!worldState.sortie) return '';
+            
+            const sortie = worldState.sortie;
+            const timeLeft = getTimeRemaining(sortie.expiry);
+            
+            return `
+                <div class="card" data-category="missions" data-search="sortie ${sortie.boss} ${sortie.variants?.map(v => v.missionType + ' ' + v.modifier).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">⚔ Sortie</h2>
+                        <span class="card-timer" data-timer="${sortie.expiry}">${formatTime(timeLeft)}</span>
+                    </div>
+                    <div class="card-content">
+                        ${sortie.variants?.map(variant => `
+                            <div class="sortie-mission">
+                                <div class="sortie-type">${variant.missionType}</div>
+                                <div class="sortie-modifier">${variant.modifier}</div>
+                            </div>
+                        `).join('') || '<div class="empty-state">No sortie data</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderArbitration() {
+            if (!worldState.arbitration) return '';
+            
+            const arb = worldState.arbitration;
+            const timeLeft = getTimeRemaining(arb.expiry);
+            
+            return `
+                <div class="card" data-category="missions" data-search="arbitration ${arb.type} ${arb.enemy} ${arb.node}">
+                    <div class="card-header">
+                        <h2 class="card-title">🎯 Arbitration</h2>
+                        <span class="card-timer" data-timer="${arb.expiry}">${formatTime(timeLeft)}</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="mission-item">
+                            <div class="mission-type">${arb.type} - ${arb.enemy}</div>
+                            <div class="mission-location">@ ${arb.node}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderArchonHunt() {
+            if (!worldState.archonHunt) return '';
+            
+            const hunt = worldState.archonHunt;
+            const timeLeft = getTimeRemaining(hunt.expiry);
+            
+            return `
+                <div class="card" data-category="missions" data-search="archon hunt ${hunt.boss} ${hunt.missions?.map(m => m.type).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">👑 Archon Hunt</h2>
+                        <span class="card-timer" data-timer="${hunt.expiry}">${formatTime(timeLeft)}</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="archon-boss">${hunt.boss || 'Unknown Archon'}</div>
+                        <div class="archon-missions">
+                            ${hunt.missions?.map(m => m.type).join(' → ') || 'Loading...'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDarvoDeal() {
+            if (!worldState.dailyDeals || worldState.dailyDeals.length === 0) return '';
+            
+            const deal = worldState.dailyDeals[0];
+            const timeLeft = getTimeRemaining(deal.expiry);
+            
+            return `
+                <div class="card" data-category="events" data-search="darvo deal ${deal.item} platinum discount sale">
+                    <div class="card-header">
+                        <h2 class="card-title">💰 Darvo's Deal</h2>
+                        <span class="card-timer" data-timer="${deal.expiry}">${formatTime(timeLeft)}</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="darvo-item">
+                            <div class="darvo-icon">🔫</div>
+                            <div class="darvo-info">
+                                <div class="darvo-name">${deal.item}</div>
+                                <div class="darvo-stock">${deal.sold}/${deal.total} Sold</div>
+                            </div>
+                            <div class="darvo-price">
+                                <div class="darvo-original">${deal.originalPrice}p</div>
+                                <div class="darvo-discount">
+                                    ${deal.salePrice}p
+                                    <span class="darvo-percent">-${deal.discount}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBaro() {
+            if (!worldState.voidTrader) return '';
+            
+            const baro = worldState.voidTrader;
+            const isActive = baro.active;
+            const timeLeft = getTimeRemaining(isActive ? baro.expiry : baro.activation);
+            
+            return `
+                <div class="card" data-category="events" data-search="baro ki'teer void trader ${baro.location}">
+                    <div class="card-header">
+                        <h2 class="card-title">🛸 Baro Ki'Teer</h2>
+                        <span class="card-timer" data-timer="${isActive ? baro.expiry : baro.activation}">${formatTime(timeLeft)}</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="baro-status">
+                            <div class="baro-location">
+                                ${isActive ? `Currently at <strong>${baro.location}</strong>` : `Next visit: <strong>${baro.location}</strong>`}
+                            </div>
+                            <div class="baro-countdown">
+                                ${isActive ? 'Leaving in ' : 'Arriving in '}
+                                <span data-timer="${isActive ? baro.expiry : baro.activation}">${formatTime(timeLeft)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFissures() {
+            if (!worldState.fissures) return '';
+            
+            const normalFissures = worldState.fissures
+                .filter(f => !f.isStorm && !f.isHard)
+                .sort((a, b) => a.tierNum - b.tierNum)
+                .slice(0, 8);
+            
+            return `
+                <div class="card" data-category="fissures" data-search="void fissures ${normalFissures.map(f => f.tier + ' ' + f.missionType + ' ' + f.node + ' ' + f.enemy).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">🔥 Void Fissures</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="fissure-grid">
+                            ${normalFissures.map(f => `
+                                <div class="fissure-item">
+                                    <span class="fissure-tier ${f.tier.toLowerCase()}">${f.tier}</span>
+                                    <div class="fissure-info">
+                                        <div class="fissure-mission">${f.missionType}<span class="mission-faction">${f.enemy}</span></div>
+                                        <div class="fissure-location">${f.node}</div>
+                                    </div>
+                                    <span class="fissure-timer" data-timer="${f.expiry}">${formatTime(getTimeRemaining(f.expiry))}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSteelPathFissures() {
+            if (!worldState.fissures) return '';
+            
+            const steelFissures = worldState.fissures
+                .filter(f => f.isHard && !f.isStorm)
+                .sort((a, b) => a.tierNum - b.tierNum)
+                .slice(0, 6);
+            
+            if (steelFissures.length === 0) return '';
+            
+            return `
+                <div class="card" data-category="fissures" data-search="steel path fissures ${steelFissures.map(f => f.tier + ' ' + f.missionType + ' ' + f.node).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">🔥 Steel Path Fissures</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="fissure-grid">
+                            ${steelFissures.map(f => `
+                                <div class="fissure-item">
+                                    <span class="fissure-tier ${f.tier.toLowerCase()}">${f.tier}</span>
+                                    <div class="fissure-info">
+                                        <div class="fissure-mission">${f.missionType}<span class="mission-faction">${f.enemy}</span></div>
+                                        <div class="fissure-location">${f.node}</div>
+                                    </div>
+                                    <span class="fissure-timer" data-timer="${f.expiry}">${formatTime(getTimeRemaining(f.expiry))}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInvasions() {
+            if (!worldState.invasions) return '';
+            
+            const activeInvasions = worldState.invasions
+                .filter(inv => !inv.completed)
+                .slice(0, 6);
+            
+            if (activeInvasions.length === 0) return '';
+            
+            return `
+                <div class="card" data-category="invasions" data-search="invasions ${activeInvasions.map(i => i.node + ' ' + i.attackingFaction + ' ' + i.defendingFaction + ' ' + (i.attackerReward?.itemString || '') + ' ' + (i.defenderReward?.itemString || '')).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">⚔ Invasions</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="invasion-list">
+                            ${activeInvasions.map(inv => `
+                                <div class="invasion-item">
+                                    <div class="invasion-node">${inv.node}</div>
+                                    <div class="invasion-progress">
+                                        <span style="color: var(--accent-green)">${inv.attackingFaction}</span>
+                                        <div class="invasion-bar">
+                                            <div class="invasion-fill" style="width: ${((inv.completion + 100) / 2)}%"></div>
+                                        </div>
+                                        <span style="color: var(--accent-red)">${inv.defendingFaction}</span>
+                                    </div>
+                                    <div class="invasion-rewards">
+                                        <span>${inv.attackerReward?.itemString || 'Credits'}</span>
+                                        <span>${inv.defenderReward?.itemString || 'Credits'}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAlerts() {
+            if (!worldState.alerts || worldState.alerts.length === 0) return '';
+            
+            return `
+                <div class="card" data-category="events" data-search="alerts ${worldState.alerts.map(a => a.mission?.type + ' ' + a.mission?.node + ' ' + (a.mission?.reward?.itemString || '')).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">🚨 Alerts</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="mission-list">
+                            ${worldState.alerts.map(alert => `
+                                <div class="mission-item">
+                                    <div class="mission-type">${alert.mission?.type || 'Mission'}</div>
+                                    <div class="mission-location">@ ${alert.mission?.node || 'Unknown'}</div>
+                                    <div class="mission-details">${alert.mission?.reward?.itemString || alert.mission?.reward?.credits + ' Credits' || 'Reward'}</div>
+                                    <div class="mission-timer" data-timer="${alert.expiry}">${formatTime(getTimeRemaining(alert.expiry))}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEvents() {
+            if (!worldState.events || worldState.events.length === 0) return '';
+            
+            return `
+                <div class="card" data-category="events" data-search="events ${worldState.events.map(e => e.description).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">🎉 Events</h2>
+                    </div>
+                    <div class="card-content">
+                        ${worldState.events.map(event => `
+                            <div class="event-item">
+                                <div class="event-icon">⭐</div>
+                                <span class="event-name">${event.description || 'Active Event'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNews() {
+            if (!worldState.news) return '';
+            
+            const recentNews = worldState.news
+                .filter(n => !n.update && !n.primeAccess)
+                .slice(0, 8);
+            
+            return `
+                <div class="card" data-category="events" data-search="news updates ${recentNews.map(n => n.message).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">📰 News</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="news-list">
+                            ${recentNews.map(news => `
+                                <a href="${news.link}" target="_blank" class="news-item">
+                                    <span class="news-date">${formatDate(news.date)}</span>
+                                    <span class="news-title">${news.message}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSteelPath() {
+            if (!worldState.steelPath) return '';
+            
+            const sp = worldState.steelPath;
+            const timeLeft = getTimeRemaining(sp.expiry);
+            
+            return `
+                <div class="card" data-category="missions" data-search="steel path incursions ${sp.currentReward?.name}">
+                    <div class="card-header">
+                        <h2 class="card-title">🗡 Steel Path</h2>
+                        <span class="card-timer" data-timer="${sp.expiry}">${formatTime(timeLeft)}</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="steel-path-list">
+                            <div class="steel-item">
+                                <div>
+                                    <div class="steel-mission">Steel Path Honors</div>
+                                    <div class="steel-location">Current Offering</div>
+                                </div>
+                                <span class="steel-level">${sp.currentReward?.name || 'Unknown'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVoidStorms() {
+            if (!worldState.fissures) return '';
+            
+            const storms = worldState.fissures
+                .filter(f => f.isStorm)
+                .slice(0, 6);
+            
+            if (storms.length === 0) return '';
+            
+            return `
+                <div class="card" data-category="fissures" data-search="void storms railjack ${storms.map(s => s.tier + ' ' + s.missionType + ' ' + s.node).join(' ')}">
+                    <div class="card-header">
+                        <h2 class="card-title">⛈ Void Storms</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="fissure-grid">
+                            ${storms.map(s => `
+                                <div class="fissure-item">
+                                    <span class="fissure-tier ${s.tier.toLowerCase()}">${s.tier}</span>
+                                    <div class="fissure-info">
+                                        <div class="fissure-mission">${s.missionType}<span class="mission-faction">${s.enemy}</span></div>
+                                        <div class="fissure-location">${s.node}</div>
+                                    </div>
+                                    <span class="fissure-timer" data-timer="${s.expiry}">${formatTime(getTimeRemaining(s.expiry))}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Timer updates
+        function startTimers() {
+            setInterval(() => {
+                document.querySelectorAll('[data-timer]').forEach(el => {
+                    const expiry = el.getAttribute('data-timer');
+                    el.textContent = formatTime(getTimeRemaining(expiry));
+                });
+            }, 1000);
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                const searchText = card.getAttribute('data-search')?.toLowerCase() || '';
+                const cardText = card.textContent.toLowerCase();
+                
+                if (query === '' || searchText.includes(query) || cardText.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            // Reset filter tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector('[data-filter="all"]').classList.add('active');
+        });
+
+        // Filter tabs
+        document.getElementById('filterTabs').addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-tab')) {
+                const filter = e.target.getAttribute('data-filter');
+                
+                // Update active state
+                document.querySelectorAll('.filter-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                
+                // Clear search
+                document.getElementById('searchInput').value = '';
+                
+                // Filter cards
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    if (filter === 'all') {
+                        card.classList.remove('hidden');
+                    } else {
+                        const category = card.getAttribute('data-category');
+                        if (category === filter) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Auto-refresh every 60 seconds
+        setInterval(fetchWorldState, 60000);
+
+        // Initial load
+        fetchWorldState();
+    </script>
+</body>
+</html>
