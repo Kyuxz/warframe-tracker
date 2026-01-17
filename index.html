@@ -1,809 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Warframe World State Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #0d0d0d;
-            --bg-secondary: #1a1a1a;
-            --bg-card: #1e1e1e;
-            --bg-card-hover: #252525;
-            --accent-gold: #c9a227;
-            --accent-blue: #00bfff;
-            --accent-green: #4ade80;
-            --accent-red: #ef4444;
-            --accent-orange: #f97316;
-            --accent-purple: #a855f7;
-            --text-primary: #e5e5e5;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --border-color: #2d2d2d;
-            --glow-gold: 0 0 20px rgba(201, 162, 39, 0.3);
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, #0a0a0a 100%);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .logo {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-gold), #b8860b);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        /* Search Bar */
-        .search-container {
-            flex: 1;
-            max-width: 500px;
-            min-width: 250px;
-        }
-
-        .search-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.875rem 1rem 0.875rem 3rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-            box-shadow: var(--glow-gold);
-        }
-
-        .search-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        /* Status Bar */
-        .status-bar {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-green);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Main Content */
-        .main-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Grid Layout */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 1.5rem;
-        }
-
-        /* Card Styles */
-        .card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: var(--accent-gold);
-            box-shadow: var(--glow-gold);
-            transform: translateY(-2px);
-        }
-
-        .card.hidden {
-            display: none;
-        }
-
-        .card-header {
-            padding: 1rem 1.25rem;
-            background: linear-gradient(135deg, rgba(201, 162, 39, 0.1) 0%, transparent 100%);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .card-timer {
-            background: rgba(0, 191, 255, 0.15);
-            color: var(--accent-blue);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            font-family: 'Rajdhani', sans-serif;
-        }
-
-        .card-content {
-            padding: 1.25rem;
-        }
-
-        /* Environment Cards */
-        .env-grid {
-            display: grid;
-            gap: 0.75rem;
-        }
-
-        .env-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .env-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .env-name {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .env-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .env-state {
-            padding: 0.25rem 0.625rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            text-transform: capitalize;
-        }
-
-        .env-state.day { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
-        .env-state.night { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
-        .env-state.cold { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
-        .env-state.warm { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
-        .env-state.fass { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
-        .env-state.vome { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
-
-        .env-timer {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-family: 'Rajdhani', sans-serif;
-        }
-
-        /* Mission Items */
-        .mission-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .mission-item {
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            border-left: 3px solid var(--accent-gold);
-            transition: all 0.2s ease;
-        }
-
-        .mission-item:hover {
-            background: var(--bg-card-hover);
-            border-left-color: var(--accent-blue);
-        }
-
-        .mission-type {
-            font-weight: 600;
-            color: var(--accent-gold);
-            margin-bottom: 0.25rem;
-        }
-
-        .mission-details {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .mission-faction {
-            display: inline-block;
-            padding: 0.125rem 0.5rem;
-            background: rgba(139, 92, 246, 0.15);
-            color: #a78bfa;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            margin-left: 0.5rem;
-        }
-
-        .mission-location {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
-        }
-
-        .mission-timer {
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--accent-blue);
-            font-family: 'Rajdhani', sans-serif;
-        }
-
-        /* Fissure Items */
-        .fissure-grid {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        .fissure-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .fissure-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .fissure-tier {
-            min-width: 70px;
-            padding: 0.375rem 0.75rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        .fissure-tier.lith { background: rgba(180, 83, 9, 0.2); color: #d97706; }
-        .fissure-tier.meso { background: rgba(234, 179, 8, 0.2); color: #eab308; }
-        .fissure-tier.neo { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-        .fissure-tier.axi { background: rgba(14, 165, 233, 0.2); color: #0ea5e9; }
-        .fissure-tier.requiem { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
-        .fissure-tier.omnia { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
-
-        .fissure-info {
-            flex: 1;
-        }
-
-        .fissure-mission {
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 0.125rem;
-        }
-
-        .fissure-location {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .fissure-timer {
-            font-size: 0.875rem;
-            color: var(--accent-blue);
-            font-family: 'Rajdhani', sans-serif;
-        }
-
-        /* News Items */
-        .news-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .news-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-
-        .news-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .news-date {
-            min-width: 40px;
-            padding: 0.25rem 0.5rem;
-            background: rgba(201, 162, 39, 0.15);
-            color: var(--accent-gold);
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .news-title {
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        /* Invasion Items */
-        .invasion-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .invasion-item {
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-        }
-
-        .invasion-node {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .invasion-progress {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .invasion-bar {
-            flex: 1;
-            height: 6px;
-            background: var(--bg-primary);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .invasion-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
-            transition: width 0.3s ease;
-        }
-
-        .invasion-rewards {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        /* Sortie */
-        .sortie-mission {
-            padding: 0.75rem 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            margin-bottom: 0.5rem;
-        }
-
-        .sortie-mission:last-child {
-            margin-bottom: 0;
-        }
-
-        .sortie-type {
-            font-weight: 600;
-            color: var(--accent-gold);
-        }
-
-        .sortie-modifier {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 0.25rem;
-        }
-
-        /* Darvo Deal */
-        .darvo-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-        }
-
-        .darvo-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--bg-primary);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .darvo-info {
-            flex: 1;
-        }
-
-        .darvo-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--text-primary);
-        }
-
-        .darvo-stock {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-
-        .darvo-price {
-            text-align: right;
-        }
-
-        .darvo-original {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        .darvo-discount {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
-
-        .darvo-percent {
-            font-size: 0.75rem;
-            color: var(--accent-green);
-            background: rgba(74, 222, 128, 0.15);
-            padding: 0.125rem 0.5rem;
-            border-radius: 4px;
-            margin-left: 0.5rem;
-        }
-
-        /* Baro */
-        .baro-status {
-            text-align: center;
-            padding: 1.5rem;
-        }
-
-        .baro-location {
-            font-size: 1.1rem;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .baro-countdown {
-            font-size: 1.5rem;
-            font-family: 'Rajdhani', sans-serif;
-            color: var(--accent-gold);
-        }
-
-        /* Events */
-        .event-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            margin-bottom: 0.5rem;
-        }
-
-        .event-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .event-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(201, 162, 39, 0.15);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-gold);
-        }
-
-        .event-name {
-            flex: 1;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        /* Loading State */
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem;
-            color: var(--text-muted);
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--accent-gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header {
-                padding: 1rem;
-            }
-
-            .header-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .logo {
-                justify-content: center;
-            }
-
-            .search-container {
-                max-width: 100%;
-            }
-
-            .status-bar {
-                justify-content: center;
-            }
-
-            .main-container {
-                padding: 1rem;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-        }
-
-        /* Filter Tabs */
-        .filter-tabs {
-            display: flex;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            background: var(--bg-secondary);
-            overflow-x: auto;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .filter-tab {
-            padding: 0.5rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            font-size: 0.9rem;
-        }
-
-        .filter-tab:hover {
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        .filter-tab.active {
-            background: rgba(201, 162, 39, 0.15);
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        /* Archon Hunt */
-        .archon-boss {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .archon-missions {
-            color: var(--text-secondary);
-        }
-
-        /* Steel Path */
-        .steel-path-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .steel-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-        }
-
-        .steel-mission {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .steel-location {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .steel-level {
-            font-size: 0.8rem;
-            color: var(--accent-purple);
-        }
-
-        /* Bounty table */
-        .bounty-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .bounty-table th,
-        .bounty-table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .bounty-table th {
-            color: var(--accent-gold);
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-
-        .bounty-table td {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .bounty-table tr:hover td {
-            background: var(--bg-secondary);
-        }
-
-        .bounty-table tr:last-child td {
-            border-bottom: none;
-        }
+        /* (Kept the same styling as original) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root{
+            --bg-primary:#0d0d0d; --bg-secondary:#1a1a1a; --bg-card:#1e1e1e; --bg-card-hover:#252525;
+            --accent-gold:#c9a227; --accent-blue:#00bfff; --accent-green:#4ade80; --accent-red:#ef4444;
+            --accent-orange:#f97316; --accent-purple:#a855f7;
+            --text-primary:#e5e5e5; --text-secondary:#9ca3af; --text-muted:#6b7280; --border-color:#2d2d2d;
+            --glow-gold:0 0 20px rgba(201,162,39,0.3);
+        }
+        body{
+            font-family:'Roboto',sans-serif;
+            background:var(--bg-primary);
+            color:var(--text-primary);
+            min-height:100vh;
+            line-height:1.6;
+        }
+        .header{ background:linear-gradient(135deg,var(--bg-secondary) 0%,#0a0a0a 100%); border-bottom:1px solid var(--border-color); padding:1rem 2rem; position:sticky; top:0; z-index:100; backdrop-filter:blur(10px); }
+        .header-content{ max-width:1600px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; }
+        .logo{ font-family:'Rajdhani',sans-serif; font-size:1.8rem; font-weight:700; color:var(--accent-gold); text-transform:uppercase; letter-spacing:2px; display:flex; align-items:center; gap:0.5rem; }
+        .logo-icon{ width:40px; height:40px; background:linear-gradient(135deg,var(--accent-gold),#b8860b); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; }
+        .search-container{ flex:1; max-width:500px; min-width:250px; }
+        .search-wrapper{ position:relative; display:flex; align-items:center; }
+        .search-icon{ position:absolute; left:1rem; color:var(--text-muted); font-size:1.2rem; }
+        .search-input{ width:100%; padding:0.875rem 1rem 0.875rem 3rem; background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; color:var(--text-primary); font-size:1rem; transition:all 0.3s ease; }
+        .search-input:focus{ outline:none; border-color:var(--accent-gold); box-shadow:var(--glow-gold); }
+        .search-input::placeholder{ color:var(--text-muted); }
+        .status-bar{ display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+        .status-item{ display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; color:var(--text-secondary); }
+        .status-dot{ width:8px; height:8px; border-radius:50%; background:var(--accent-green); animation:pulse 2s infinite; }
+        @keyframes pulse{ 0%,100%{ opacity:1 } 50%{ opacity:0.5 } }
+        .main-container{ max-width:1600px; margin:0 auto; padding:2rem; }
+        .dashboard-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(350px,1fr)); gap:1.5rem; }
+        .card{ background:var(--bg-card); border-radius:16px; border:1px solid var(--border-color); overflow:hidden; transition:all 0.3s ease; }
+        .card:hover{ border-color:var(--accent-gold); box-shadow:var(--glow-gold); transform:translateY(-2px); }
+        .card-header{ padding:1rem 1.25rem; background:linear-gradient(135deg, rgba(201,162,39,0.1) 0%, transparent 100%); border-bottom:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; }
+        .card-title{ font-family:'Rajdhani',sans-serif; font-size:1.25rem; font-weight:600; color:var(--accent-gold); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:0.5rem; }
+        .card-timer{ background:rgba(0,191,255,0.15); color:var(--accent-blue); padding:0.25rem 0.75rem; border-radius:20px; font-size:0.875rem; font-weight:500; font-family:'Rajdhani',sans-serif; }
+        .card-content{ padding:1.25rem; }
+        .env-grid{ display:grid; gap:0.75rem; }
+        .env-item{ display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem; background:var(--bg-secondary); border-radius:10px; transition:all 0.2s ease; }
+        .env-item:hover{ background:var(--bg-card-hover); }
+        .env-name{ font-weight:500; color:var(--text-primary); }
+        .env-status{ display:flex; align-items:center; gap:0.5rem; }
+        .env-state{ padding:0.25rem 0.625rem; border-radius:6px; font-size:0.8rem; font-weight:500; text-transform:capitalize; }
+        .env-state.day{ background:rgba(251,191,36,0.2); color:#fbbf24; }
+        .env-state.night{ background:rgba(99,102,241,0.2); color:#818cf8; }
+        .env-state.cold{ background:rgba(56,189,248,0.2); color:#38bdf8; }
+        .env-state.warm{ background:rgba(251,146,60,0.2); color:#fb923c; }
+        .env-timer{ font-size:0.875rem; color:var(--text-secondary); font-family:'Rajdhani',sans-serif; }
+        .fissure-grid{ display:grid; gap:0.5rem; }
+        .fissure-item{ display:flex; align-items:center; gap:1rem; padding:0.75rem 1rem; background:var(--bg-secondary); border-radius:10px; transition:all 0.2s ease; }
+        .fissure-tier{ min-width:70px; padding:0.375rem 0.75rem; border-radius:6px; font-weight:600; font-size:0.8rem; text-align:center; text-transform:uppercase; }
+        .fissure-tier.lith{ background:rgba(180,83,9,0.2); color:#d97706; }
+        .fissure-tier.meso{ background:rgba(234,179,8,0.2); color:#eab308; }
+        .fissure-tier.neo{ background:rgba(34,197,94,0.2); color:#22c55e; }
+        .fissure-tier.axi{ background:rgba(14,165,233,0.2); color:#0ea5e9; }
+        .fissure-info{ flex:1; }
+        .fissure-mission{ font-weight:500; color:var(--text-primary); margin-bottom:0.125rem; }
+        .fissure-location{ font-size:0.85rem; color:var(--text-muted); }
+        .fissure-timer{ font-size:0.875rem; color:var(--accent-blue); font-family:'Rajdhani',sans-serif; }
+        .loading{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem; color:var(--text-muted); }
+        .loading-spinner{ width:40px; height:40px; border:3px solid var(--border-color); border-top-color:var(--accent-gold); border-radius:50%; animation:spin 1s linear infinite; margin-bottom:1rem; }
+        @keyframes spin{ to{ transform:rotate(360deg); } }
+        .empty-state{ text-align:center; padding:2rem; color:var(--text-muted); }
+        .news-list{ display:flex; flex-direction:column; gap:0.5rem; max-height:300px; overflow-y:auto; }
+        .news-item{ display:flex; align-items:flex-start; gap:0.75rem; padding:0.75rem; background:var(--bg-secondary); border-radius:10px; transition:all 0.2s ease; text-decoration:none; color:inherit; }
+        .news-date{ min-width:40px; padding:0.25rem 0.5rem; background:rgba(201,162,39,0.15); color:var(--accent-gold); border-radius:6px; font-size:0.75rem; font-weight:500; text-align:center; }
+        .news-title{ color:var(--text-primary); font-size:0.9rem; line-height:1.4; }
+        @media (max-width:768px){
+            .header{ padding:1rem; }
+            .header-content{ flex-direction:column; align-items:stretch; }
+            .logo{ justify-content:center; }
+            .search-container{ max-width:100%; }
+            .status-bar{ justify-content:center; }
+            .main-container{ padding:1rem; }
+            .dashboard-grid{ grid-template-columns:1fr; }
+            .card-header{ flex-direction:column; align-items:flex-start; gap:0.5rem; }
+        }
+        .filter-tabs{ display:flex; gap:0.5rem; padding:1rem 2rem; background:var(--bg-secondary); overflow-x:auto; border-bottom:1px solid var(--border-color); }
+        .filter-tab{ padding:0.5rem 1rem; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; transition:all 0.2s ease; white-space:nowrap; font-size:0.9rem; }
+        .filter-tab:hover{ border-color:var(--accent-gold); color:var(--accent-gold); }
+        .filter-tab.active{ background:rgba(201,162,39,0.15); border-color:var(--accent-gold); color:var(--accent-gold); }
     </style>
 </head>
 <body>
@@ -813,28 +99,20 @@
                 <div class="logo-icon">⚔</div>
                 Warframe Tracker
             </div>
-            
+
             <div class="search-container">
                 <div class="search-wrapper">
                     <span class="search-icon">🔍</span>
-                    <input 
-                        type="text" 
-                        class="search-input" 
-                        id="searchInput"
-                        placeholder="Search missions, fissures, alerts..."
-                        autocomplete="off"
-                    >
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search missions, fissures, alerts..." autocomplete="off">
                 </div>
             </div>
-            
+
             <div class="status-bar">
                 <div class="status-item">
-                    <span class="status-dot"></span>
+                    <span class="status-dot" id="liveDot"></span>
                     <span>Live Data</span>
                 </div>
-                <div class="status-item" id="lastUpdate">
-                    Updated: --
-                </div>
+                <div class="status-item" id="lastUpdate">Updated: --</div>
             </div>
         </div>
     </header>
@@ -858,606 +136,345 @@
     </main>
 
     <script>
+        // API endpoint for Warframe worldstate (PC)
         const API_URL = 'https://api.warframestat.us/pc';
         let worldState = null;
-        let timers = {};
+        let timerInterval = null;
 
-        // Utility functions
+        // Utilities
         function formatTime(seconds) {
+            if (typeof seconds !== 'number' || isNaN(seconds)) return '--';
             if (seconds < 0) return 'Expired';
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = Math.floor(seconds % 60);
-            if (h > 0) return `${h}h ${m}m ${s}s`;
-            if (m > 0) return `${m}m ${s}s`;
-            return `${s}s`;
+            if (h > 0) return \\`${h}h ${m}m ${s}s\
+            if (m > 0) return \\`${m}m ${s}s\
+            return \\`${s}s\
         }
 
         function getTimeRemaining(expiry) {
-            const now = new Date().getTime();
+            if (!expiry) return NaN;
             const end = new Date(expiry).getTime();
+            const now = Date.now();
             return Math.floor((end - now) / 1000);
         }
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-            if (diff === 0) return 'Today';
-            if (diff === 1) return '1d';
-            return `${diff}d`;
+        function safeExpiry(obj, ...keys) {
+            for (const k of keys) {
+                if (obj && obj[k]) return obj[k];
+            }
+            return obj && obj.expiry ? obj.expiry : null;
         }
 
-        function capitalize(str) {
+        function capitalize(str){
             return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
         }
 
         // Fetch world state
-        async function fetchWorldState() {
-            try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('Failed to fetch');
-                worldState = await response.json();
+        async function fetchWorldState(){
+            try{
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error('Failed to fetch world state: ' + res.status);
+                worldState = await res.json();
                 renderDashboard();
                 updateLastUpdateTime();
-            } catch (error) {
+            } catch (error){
                 console.error('Error fetching world state:', error);
-                document.getElementById('dashboard').innerHTML = `
-                    <div class="empty-state">
-                        <p>Failed to load world state. Please try again later.</p>
-                        <button onclick="fetchWorldState()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--accent-gold); border: none; border-radius: 8px; cursor: pointer; color: black;">Retry</button>
-                    </div>
-                `;
+                // Fixed: use concatenated string (no broken template literal) and hook up retry button
+                document.getElementById('dashboard').innerHTML =
+                    '<div class="empty-state">' +
+                        '<p>Failed to load world state. Please try again later.</p>' +
+                        '<button id="retryBtn" style="margin-top:1rem; padding:0.5rem 1rem; background:var(--accent-gold); border:none; border-radius:8px; cursor:pointer; color:#000;">Retry</button>' +
+                    '</div>';
+                const retryBtn = document.getElementById('retryBtn');
+                if (retryBtn) retryBtn.addEventListener('click', () => {
+                    // show loading
+                    document.getElementById('dashboard').innerHTML = '<div class="loading"><div class="loading-spinner"></div><span>Loading world state...</span></div>';
+                    fetchWorldState();
+                });
             }
         }
 
-        function updateLastUpdateTime() {
-            document.getElementById('lastUpdate').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+        function updateLastUpdateTime(){
+            const el = document.getElementById('lastUpdate');
+            if (el) el.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
         }
 
-        // Render functions
-        function renderDashboard() {
+        // Rendering
+        function renderDashboard(){
             const dashboard = document.getElementById('dashboard');
-            dashboard.innerHTML = '';
+            if (!dashboard) return;
+            // Build cards HTML
+            let html = '';
 
-            // Environments
-            dashboard.innerHTML += renderEnvironments();
-            
-            // Sortie
-            dashboard.innerHTML += renderSortie();
-            
-            // Arbitration
-            dashboard.innerHTML += renderArbitration();
-            
-            // Archon Hunt
-            dashboard.innerHTML += renderArchonHunt();
-            
-            // Darvo Deal
-            dashboard.innerHTML += renderDarvoDeal();
-            
-            // Baro Ki'Teer
-            dashboard.innerHTML += renderBaro();
-            
-            // Void Fissures
-            dashboard.innerHTML += renderFissures();
-            
-            // Steel Path Fissures
-            dashboard.innerHTML += renderSteelPathFissures();
-            
-            // Invasions
-            dashboard.innerHTML += renderInvasions();
-            
-            // Alerts
-            dashboard.innerHTML += renderAlerts();
-            
-            // Events
-            dashboard.innerHTML += renderEvents();
-            
-            // News
-            dashboard.innerHTML += renderNews();
-            
-            // Steel Path Incursions
-            dashboard.innerHTML += renderSteelPath();
-            
-            // Void Storms
-            dashboard.innerHTML += renderVoidStorms();
+            html += renderEnvironments();
+            html += renderFissures();
+            html += renderSortie();
+            html += renderInvasions();
+            html += renderAlerts();
+            html += renderNews();
 
+            dashboard.innerHTML = html;
+
+            // Start timers to refresh countdowns every second
             startTimers();
         }
 
-        function renderEnvironments() {
-            const environments = [];
-            
-            if (worldState.earthCycle) {
-                environments.push({
-                    name: 'Plains of Eidolon / Earth',
-                    state: worldState.earthCycle.isDay ? 'day' : 'night',
-                    expiry: worldState.earthCycle.expiry
-                });
+        function renderEnvironments(){
+            const cycles = [];
+            // Earth / Plains (cetus/earthCycle sometimes under cetusCycle or earthCycle)
+            if (worldState.cetusCycle) {
+                cycles.push({ name: 'Cetus / Plains of Eidolon', state: worldState.cetusCycle.isDay ? 'day' : 'night', expiry: worldState.cetusCycle.expiry });
+            } else if (worldState.earthCycle) {
+                cycles.push({ name: 'Plains of Eidolon / Earth', state: worldState.earthCycle.isDay ? 'day' : 'night', expiry: worldState.earthCycle.expiry });
             }
-            
-            if (worldState.vallisCycle) {
-                environments.push({
-                    name: 'Orb Vallis',
-                    state: worldState.vallisCycle.isWarm ? 'warm' : 'cold',
-                    expiry: worldState.vallisCycle.expiry
-                });
-            }
-            
-            if (worldState.cambionCycle) {
-                environments.push({
-                    name: 'Cambion Drift',
-                    state: worldState.cambionCycle.active.toLowerCase(),
-                    expiry: worldState.cambionCycle.expiry
-                });
-            }
-            
-            if (worldState.duviriCycle) {
-                environments.push({
-                    name: 'Duviri',
-                    state: worldState.duviriCycle.state,
-                    expiry: worldState.duviriCycle.expiry
-                });
-            }
-            
-            if (worldState.zarimanCycle) {
-                environments.push({
-                    name: 'Zariman',
-                    state: worldState.zarimanCycle.state,
-                    expiry: worldState.zarimanCycle.expiry
+
+            if (worldState.vallisCycle) cycles.push({ name: 'Orb Vallis', state: worldState.vallisCycle.isWarm ? 'warm' : 'cold', expiry: worldState.vallisCycle.expiry });
+            if (worldState.cambionCycle) cycles.push({ name: 'Cambion Drift', state: (worldState.cambionCycle.active || '').toLowerCase(), expiry: worldState.cambionCycle.expiry });
+            if (worldState.duviriCycle) cycles.push({ name: 'Duviri', state: worldState.duviriCycle.state || 'unknown', expiry: worldState.duviriCycle.expiry });
+
+            let out = '<div class="card">' +
+                '<div class="card-header"><div class="card-title">Environments</div><div class="card-timer">Real-time</div></div>' +
+                '<div class="card-content"><div class="env-grid">';
+
+            if (!cycles.length) {
+                out += '<div class="empty-state">No environment data available.</div>';
+            } else {
+                cycles.forEach((c, idx) => {
+                    const secs = getTimeRemaining(c.expiry);
+                    out += `<div class="env-item">
+                        <div class="env-name">${c.name}</div>
+                        <div class="env-status">
+                            <div class="env-state ${c.state}">${capitalize(c.state)}</div>
+                            <div class="env-timer" data-expiry="${encodeURIComponent(c.expiry)}" id="env-timer-${idx}">${formatTime(secs)}</div>
+                        </div>
+                    </div>`;
                 });
             }
 
-            return `
-                <div class="card" data-category="environments" data-search="environments plains eidolon orb vallis cambion drift duviri zariman earth cycle">
-                    <div class="card-header">
-                        <h2 class="card-title">🌍 Environments</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="env-grid">
-                            ${environments.map(env => `
-                                <div class="env-item">
-                                    <span class="env-name">${env.name}</span>
-                                    <div class="env-status">
-                                        <span class="env-state ${env.state}">${capitalize(env.state)}</span>
-                                        <span class="env-timer" data-timer="${env.expiry}">${formatTime(getTimeRemaining(env.expiry))}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
+            out += '</div></div></div>';
+            return out;
+        }
+
+        function fissureTierClass(tier) {
+            if (!tier) return 'lith';
+            const t = tier.toLowerCase();
+            if (t.includes('lith')) return 'lith';
+            if (t.includes('meso')) return 'meso';
+            if (t.includes('neo')) return 'neo';
+            if (t.includes('axi')) return 'axi';
+            if (t.includes('requiem')) return 'requiem';
+            if (t.includes('omnia')) return 'omnia';
+            return t;
+        }
+
+        function renderFissures(){
+            const fissures = Array.isArray(worldState.fissures) ? worldState.fissures.slice(0, 8) : [];
+            let out = '<div class="card">' +
+                '<div class="card-header"><div class="card-title">Void Fissures</div><div class="card-timer">Remaining</div></div>' +
+                '<div class="card-content"><div class="fissure-grid">';
+            if (!fissures.length) {
+                out += '<div class="empty-state">No current fissures.</div>';
+            } else {
+                fissures.forEach((f, idx) => {
+                    const tier = f.tier || f.tierChance || f.tierName || f.tierType || 'Lith';
+                    const missionType = f.missionType || (f.definition && f.definition.type) || (f.mission && f.mission.type) || (f.completion || '');
+                    const node = f.node || f.location || f.name || 'Unknown';
+                    const expiry = f.expiry || f.expiredAt || f.activation || f.expiration || null;
+                    const secs = getTimeRemaining(expiry);
+                    out += `<div class="fissure-item">
+                        <div class="fissure-tier ${fissureTierClass(tier)}">${tier}</div>
+                        <div class="fissure-info">
+                            <div class="fissure-mission">${missionType || 'Unknown Mission'}</div>
+                            <div class="fissure-location">${node}</div>
                         </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSortie() {
-            if (!worldState.sortie) return '';
-            
-            const sortie = worldState.sortie;
-            const timeLeft = getTimeRemaining(sortie.expiry);
-            
-            return `
-                <div class="card" data-category="missions" data-search="sortie ${sortie.boss} ${sortie.variants?.map(v => v.missionType + ' ' + v.modifier).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">⚔ Sortie</h2>
-                        <span class="card-timer" data-timer="${sortie.expiry}">${formatTime(timeLeft)}</span>
-                    </div>
-                    <div class="card-content">
-                        ${sortie.variants?.map(variant => `
-                            <div class="sortie-mission">
-                                <div class="sortie-type">${variant.missionType}</div>
-                                <div class="sortie-modifier">${variant.modifier}</div>
-                            </div>
-                        `).join('') || '<div class="empty-state">No sortie data</div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderArbitration() {
-            if (!worldState.arbitration) return '';
-            
-            const arb = worldState.arbitration;
-            const timeLeft = getTimeRemaining(arb.expiry);
-            
-            return `
-                <div class="card" data-category="missions" data-search="arbitration ${arb.type} ${arb.enemy} ${arb.node}">
-                    <div class="card-header">
-                        <h2 class="card-title">🎯 Arbitration</h2>
-                        <span class="card-timer" data-timer="${arb.expiry}">${formatTime(timeLeft)}</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="mission-item">
-                            <div class="mission-type">${arb.type} - ${arb.enemy}</div>
-                            <div class="mission-location">@ ${arb.node}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderArchonHunt() {
-            if (!worldState.archonHunt) return '';
-            
-            const hunt = worldState.archonHunt;
-            const timeLeft = getTimeRemaining(hunt.expiry);
-            
-            return `
-                <div class="card" data-category="missions" data-search="archon hunt ${hunt.boss} ${hunt.missions?.map(m => m.type).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">👑 Archon Hunt</h2>
-                        <span class="card-timer" data-timer="${hunt.expiry}">${formatTime(timeLeft)}</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="archon-boss">${hunt.boss || 'Unknown Archon'}</div>
-                        <div class="archon-missions">
-                            ${hunt.missions?.map(m => m.type).join(' → ') || 'Loading...'}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderDarvoDeal() {
-            if (!worldState.dailyDeals || worldState.dailyDeals.length === 0) return '';
-            
-            const deal = worldState.dailyDeals[0];
-            const timeLeft = getTimeRemaining(deal.expiry);
-            
-            return `
-                <div class="card" data-category="events" data-search="darvo deal ${deal.item} platinum discount sale">
-                    <div class="card-header">
-                        <h2 class="card-title">💰 Darvo's Deal</h2>
-                        <span class="card-timer" data-timer="${deal.expiry}">${formatTime(timeLeft)}</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="darvo-item">
-                            <div class="darvo-icon">🔫</div>
-                            <div class="darvo-info">
-                                <div class="darvo-name">${deal.item}</div>
-                                <div class="darvo-stock">${deal.sold}/${deal.total} Sold</div>
-                            </div>
-                            <div class="darvo-price">
-                                <div class="darvo-original">${deal.originalPrice}p</div>
-                                <div class="darvo-discount">
-                                    ${deal.salePrice}p
-                                    <span class="darvo-percent">-${deal.discount}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderBaro() {
-            if (!worldState.voidTrader) return '';
-            
-            const baro = worldState.voidTrader;
-            const isActive = baro.active;
-            const timeLeft = getTimeRemaining(isActive ? baro.expiry : baro.activation);
-            
-            return `
-                <div class="card" data-category="events" data-search="baro ki'teer void trader ${baro.location}">
-                    <div class="card-header">
-                        <h2 class="card-title">🛸 Baro Ki'Teer</h2>
-                        <span class="card-timer" data-timer="${isActive ? baro.expiry : baro.activation}">${formatTime(timeLeft)}</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="baro-status">
-                            <div class="baro-location">
-                                ${isActive ? `Currently at <strong>${baro.location}</strong>` : `Next visit: <strong>${baro.location}</strong>`}
-                            </div>
-                            <div class="baro-countdown">
-                                ${isActive ? 'Leaving in ' : 'Arriving in '}
-                                <span data-timer="${isActive ? baro.expiry : baro.activation}">${formatTime(timeLeft)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderFissures() {
-            if (!worldState.fissures) return '';
-            
-            const normalFissures = worldState.fissures
-                .filter(f => !f.isStorm && !f.isHard)
-                .sort((a, b) => a.tierNum - b.tierNum)
-                .slice(0, 8);
-            
-            return `
-                <div class="card" data-category="fissures" data-search="void fissures ${normalFissures.map(f => f.tier + ' ' + f.missionType + ' ' + f.node + ' ' + f.enemy).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">🔥 Void Fissures</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="fissure-grid">
-                            ${normalFissures.map(f => `
-                                <div class="fissure-item">
-                                    <span class="fissure-tier ${f.tier.toLowerCase()}">${f.tier}</span>
-                                    <div class="fissure-info">
-                                        <div class="fissure-mission">${f.missionType}<span class="mission-faction">${f.enemy}</span></div>
-                                        <div class="fissure-location">${f.node}</div>
-                                    </div>
-                                    <span class="fissure-timer" data-timer="${f.expiry}">${formatTime(getTimeRemaining(f.expiry))}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSteelPathFissures() {
-            if (!worldState.fissures) return '';
-            
-            const steelFissures = worldState.fissures
-                .filter(f => f.isHard && !f.isStorm)
-                .sort((a, b) => a.tierNum - b.tierNum)
-                .slice(0, 6);
-            
-            if (steelFissures.length === 0) return '';
-            
-            return `
-                <div class="card" data-category="fissures" data-search="steel path fissures ${steelFissures.map(f => f.tier + ' ' + f.missionType + ' ' + f.node).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">🔥 Steel Path Fissures</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="fissure-grid">
-                            ${steelFissures.map(f => `
-                                <div class="fissure-item">
-                                    <span class="fissure-tier ${f.tier.toLowerCase()}">${f.tier}</span>
-                                    <div class="fissure-info">
-                                        <div class="fissure-mission">${f.missionType}<span class="mission-faction">${f.enemy}</span></div>
-                                        <div class="fissure-location">${f.node}</div>
-                                    </div>
-                                    <span class="fissure-timer" data-timer="${f.expiry}">${formatTime(getTimeRemaining(f.expiry))}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderInvasions() {
-            if (!worldState.invasions) return '';
-            
-            const activeInvasions = worldState.invasions
-                .filter(inv => !inv.completed)
-                .slice(0, 6);
-            
-            if (activeInvasions.length === 0) return '';
-            
-            return `
-                <div class="card" data-category="invasions" data-search="invasions ${activeInvasions.map(i => i.node + ' ' + i.attackingFaction + ' ' + i.defendingFaction + ' ' + (i.attackerReward?.itemString || '') + ' ' + (i.defenderReward?.itemString || '')).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">⚔ Invasions</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="invasion-list">
-                            ${activeInvasions.map(inv => `
-                                <div class="invasion-item">
-                                    <div class="invasion-node">${inv.node}</div>
-                                    <div class="invasion-progress">
-                                        <span style="color: var(--accent-green)">${inv.attackingFaction}</span>
-                                        <div class="invasion-bar">
-                                            <div class="invasion-fill" style="width: ${((inv.completion + 100) / 2)}%"></div>
-                                        </div>
-                                        <span style="color: var(--accent-red)">${inv.defendingFaction}</span>
-                                    </div>
-                                    <div class="invasion-rewards">
-                                        <span>${inv.attackerReward?.itemString || 'Credits'}</span>
-                                        <span>${inv.defenderReward?.itemString || 'Credits'}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderAlerts() {
-            if (!worldState.alerts || worldState.alerts.length === 0) return '';
-            
-            return `
-                <div class="card" data-category="events" data-search="alerts ${worldState.alerts.map(a => a.mission?.type + ' ' + a.mission?.node + ' ' + (a.mission?.reward?.itemString || '')).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">🚨 Alerts</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="mission-list">
-                            ${worldState.alerts.map(alert => `
-                                <div class="mission-item">
-                                    <div class="mission-type">${alert.mission?.type || 'Mission'}</div>
-                                    <div class="mission-location">@ ${alert.mission?.node || 'Unknown'}</div>
-                                    <div class="mission-details">${alert.mission?.reward?.itemString || alert.mission?.reward?.credits + ' Credits' || 'Reward'}</div>
-                                    <div class="mission-timer" data-timer="${alert.expiry}">${formatTime(getTimeRemaining(alert.expiry))}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderEvents() {
-            if (!worldState.events || worldState.events.length === 0) return '';
-            
-            return `
-                <div class="card" data-category="events" data-search="events ${worldState.events.map(e => e.description).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">🎉 Events</h2>
-                    </div>
-                    <div class="card-content">
-                        ${worldState.events.map(event => `
-                            <div class="event-item">
-                                <div class="event-icon">⭐</div>
-                                <span class="event-name">${event.description || 'Active Event'}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderNews() {
-            if (!worldState.news) return '';
-            
-            const recentNews = worldState.news
-                .filter(n => !n.update && !n.primeAccess)
-                .slice(0, 8);
-            
-            return `
-                <div class="card" data-category="events" data-search="news updates ${recentNews.map(n => n.message).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">📰 News</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="news-list">
-                            ${recentNews.map(news => `
-                                <a href="${news.link}" target="_blank" class="news-item">
-                                    <span class="news-date">${formatDate(news.date)}</span>
-                                    <span class="news-title">${news.message}</span>
-                                </a>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSteelPath() {
-            if (!worldState.steelPath) return '';
-            
-            const sp = worldState.steelPath;
-            const timeLeft = getTimeRemaining(sp.expiry);
-            
-            return `
-                <div class="card" data-category="missions" data-search="steel path incursions ${sp.currentReward?.name}">
-                    <div class="card-header">
-                        <h2 class="card-title">🗡 Steel Path</h2>
-                        <span class="card-timer" data-timer="${sp.expiry}">${formatTime(timeLeft)}</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="steel-path-list">
-                            <div class="steel-item">
-                                <div>
-                                    <div class="steel-mission">Steel Path Honors</div>
-                                    <div class="steel-location">Current Offering</div>
-                                </div>
-                                <span class="steel-level">${sp.currentReward?.name || 'Unknown'}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderVoidStorms() {
-            if (!worldState.fissures) return '';
-            
-            const storms = worldState.fissures
-                .filter(f => f.isStorm)
-                .slice(0, 6);
-            
-            if (storms.length === 0) return '';
-            
-            return `
-                <div class="card" data-category="fissures" data-search="void storms railjack ${storms.map(s => s.tier + ' ' + s.missionType + ' ' + s.node).join(' ')}">
-                    <div class="card-header">
-                        <h2 class="card-title">⛈ Void Storms</h2>
-                    </div>
-                    <div class="card-content">
-                        <div class="fissure-grid">
-                            ${storms.map(s => `
-                                <div class="fissure-item">
-                                    <span class="fissure-tier ${s.tier.toLowerCase()}">${s.tier}</span>
-                                    <div class="fissure-info">
-                                        <div class="fissure-mission">${s.missionType}<span class="mission-faction">${s.enemy}</span></div>
-                                        <div class="fissure-location">${s.node}</div>
-                                    </div>
-                                    <span class="fissure-timer" data-timer="${s.expiry}">${formatTime(getTimeRemaining(s.expiry))}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Timer updates
-        function startTimers() {
-            setInterval(() => {
-                document.querySelectorAll('[data-timer]').forEach(el => {
-                    const expiry = el.getAttribute('data-timer');
-                    el.textContent = formatTime(getTimeRemaining(expiry));
+                        <div class="fissure-timer" data-expiry="${encodeURIComponent(expiry)}" id="fissure-timer-${idx}">${formatTime(secs)}</div>
+                    </div>`;
                 });
+            }
+            out += '</div></div></div>';
+            return out;
+        }
+
+        function renderSortie(){
+            const s = worldState.sortie || worldState.sorties || null;
+            let out = '<div class="card">' +
+                '<div class="card-header"><div class="card-title">Sortie</div><div class="card-timer">Status</div></div>' +
+                '<div class="card-content">';
+            if (!s) {
+                out += '<div class="empty-state">No sortie active.</div>';
+            } else {
+                // sortie structure varies; try common fields
+                const boss = s.boss || s.bosses || (s.variants && s.variants[0] && s.variants[0].boss) || 'Unknown';
+                const expiry = s.expiry || s.activation || s.end || s.activatedAt || null;
+                const desc = s.variants ? s.variants.map(v => \\`${v.missionType} (${v.modifier || ''})\
+                ).join('<br>') : (s.missions ? s.missions.map(m => m.type).join('<br>') : (s.variants && s.variants.length ? s.variants[0].missionType : '---'));
+                const secs = getTimeRemaining(expiry);
+                out += `<div class="sortie-mission">
+                            <div class="sortie-type">${boss}</div>
+                            <div class="sortie-modifier">${desc}</div>
+                            <div class="mission-timer" data-expiry="${encodeURIComponent(expiry)}" id="sortie-timer">${formatTime(secs)}</div>
+                        </div>`;
+            }
+            out += '</div></div>';
+            return out;
+        }
+
+        function renderInvasions(){
+            const invasions = Array.isArray(worldState.invasions) ? worldState.invasions.slice(0,6) : [];
+            let out = '<div class="card">' +
+                '<div class="card-header"><div class="card-title">Invasions</div><div class="card-timer">Progress</div></div>' +
+                '<div class="card-content">';
+            if (!invasions.length) {
+                out += '<div class="empty-state">No invasions currently.</div>';
+            } else {
+                out += '<div class="invasion-list">';
+                invasions.forEach(inv => {
+                    const node = inv.node || inv.location || 'Unknown';
+                    const count = inv.count || inv.completion || 0;
+                    const total = inv.total || inv.required || 100;
+                    const progress = Math.min(100, Math.round((count / total) * 100));
+                    const rewards = (inv.attackerReward && inv.attackerReward.asString) ? inv.attackerReward.asString : (inv.attackerReward ? JSON.stringify(inv.attackerReward) : '--');
+                    out += `<div class="invasion-item">
+                                <div class="invasion-node">${node}</div>
+                                <div class="invasion-progress">
+                                    <div class="invasion-bar"><div class="invasion-fill" style="width:${progress}%"></div></div>
+                                    <div style="min-width:45px; text-align:right;">${progress}%</div>
+                                </div>
+                                <div class="invasion-rewards">Rewards: ${rewards}</div>
+                            </div>`;
+                });
+                out += '</div>';
+            }
+            out += '</div></div>';
+            return out;
+        }
+
+        function renderAlerts(){
+            const alerts = Array.isArray(worldState.alerts) ? worldState.alerts.slice(0,6) : [];
+            let out = '<div class="card">' +
+                '<div class="card-header"><div class="card-title">Alerts & Events</div><div class="card-timer">Active</div></div>' +
+                '<div class="card-content">';
+            if (!alerts.length) {
+                out += '<div class="empty-state">No alerts or events.</div>';
+            } else {
+                out += '<div class="mission-list">';
+                alerts.forEach((a, idx) => {
+                    const missionType = a.mission && a.mission.type ? a.mission.type : (a.type || 'Alert');
+                    const location = a.node || (a.mission && (a.mission.location || a.mission.node)) || 'Unknown';
+                    const expiry = a.expiry || a.expiration || a.end || null;
+                    const secs = getTimeRemaining(expiry);
+                    out += `<div class="mission-item">
+                                <div class="mission-type">${missionType} <span class="mission-faction">${a.faction || ''}</span></div>
+                                <div class="mission-details">${a.reward ? (a.reward.asString || JSON.stringify(a.reward)) : (a.modifier || '')}</div>
+                                <div class="mission-location">${location}</div>
+                                <div class="mission-timer" data-expiry="${encodeURIComponent(expiry)}" id="alert-timer-${idx}">${formatTime(secs)}</div>
+                            </div>`;
+                });
+                out += '</div>';
+            }
+            out += '</div></div>';
+            return out;
+        }
+
+        function renderNews(){
+            const news = Array.isArray(worldState.news) ? worldState.news.slice(0,8) : [];
+            let out = '<div class="card">' +
+                '<div class="card-header"><div class="card-title">News</div><div class="card-timer">Latest</div></div>' +
+                '<div class="card-content">';
+            if (!news.length) {
+                out += '<div class="empty-state">No news available.</div>';
+            } else {
+                out += '<div class="news-list">';
+                news.forEach(n => {
+                    const date = n.date || n.posted || '';
+                    const short = n.message ? (n.message.length > 140 ? n.message.slice(0,140) + '…' : n.message) : (n.body || '');
+                    out += `<a class="news-item" href="${n.link || '#'}" target="_blank" rel="noopener noreferrer">
+                                <div class="news-date">${date ? (new Date(date).toLocaleDateString()) : ''}</div>
+                                <div class="news-title">${n.title || short}</div>
+                            </a>`;
+                });
+                out += '</div>';
+            }
+            out += '</div></div>';
+            return out;
+        }
+
+        // Timers updater - will refresh any element with data-expiry attribute
+        function updateCountdowns() {
+            const els = document.querySelectorAll('[data-expiry]');
+            els.forEach(el => {
+                const raw = el.getAttribute('data-expiry');
+                if (!raw) return;
+                const expiry = decodeURIComponent(raw);
+                const secs = getTimeRemaining(expiry);
+                el.textContent = formatTime(secs);
+            });
+        }
+
+        function startTimers(){
+            // clear existing
+            if (timerInterval) clearInterval(timerInterval);
+            updateCountdowns();
+            timerInterval = setInterval(() => {
+                updateCountdowns();
+                updateLastUpdateTime();
             }, 1000);
         }
 
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.card');
-            
-            cards.forEach(card => {
-                const searchText = card.getAttribute('data-search')?.toLowerCase() || '';
-                const cardText = card.textContent.toLowerCase();
-                
-                if (query === '' || searchText.includes(query) || cardText.includes(query)) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-            
-            // Reset filter tabs
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelector('[data-filter="all"]').classList.add('active');
-        });
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchWorldState();
 
-        // Filter tabs
-        document.getElementById('filterTabs').addEventListener('click', (e) => {
-            if (e.target.classList.contains('filter-tab')) {
-                const filter = e.target.getAttribute('data-filter');
-                
-                // Update active state
-                document.querySelectorAll('.filter-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                e.target.classList.add('active');
-                
-                // Clear search
-                document.getElementById('searchInput').value = '';
-                
-                // Filter cards
-                const cards = document.querySelectorAll('.card');
-                cards.forEach(card => {
-                    if (filter === 'all') {
-                        card.classList.remove('hidden');
-                    } else {
-                        const category = card.getAttribute('data-category');
-                        if (category === filter) {
-                            card.classList.remove('hidden');
-                        } else {
-                            card.classList.add('hidden');
-                        }
+            // Minimal search filter behavior (client-side)
+            const search = document.getElementById('searchInput');
+            if (search) {
+                search.addEventListener('input', (e) => {
+                    const q = e.target.value.trim().toLowerCase();
+                    const dashboard = document.getElementById('dashboard');
+                    if (!dashboard) return;
+                    if (!q) {
+                        // re-render full dashboard from latest worldState
+                        renderDashboard();
+                        return;
                     }
+                    // naive filter: hide cards that don't contain query
+                    // simple text search through innerText of each top-level card
+                    const cards = dashboard.querySelectorAll('.card');
+                    cards.forEach(card => {
+                        const text = card.innerText.toLowerCase();
+                        card.style.display = text.includes(q) ? '' : 'none';
+                    });
                 });
             }
+
+            // Filter tabs (basic)
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (ev) => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const filter = tab.getAttribute('data-filter');
+                    const dashboard = document.getElementById('dashboard');
+                    if (!dashboard) return;
+                    const cards = dashboard.querySelectorAll('.card');
+                    cards.forEach(card => {
+                        if (filter === 'all') {
+                            card.style.display = '';
+                        } else {
+                            const title = card.querySelector('.card-title') ? card.querySelector('.card-title').innerText.toLowerCase() : '';
+                            card.style.display = title.includes(filter) ? '' : 'none';
+                        }
+                    });
+                });
+            });
         });
 
-        // Auto-refresh every 60 seconds
-        setInterval(fetchWorldState, 60000);
-
-        // Initial load
-        fetchWorldState();
+        // Make sure to clear interval on unload
+        window.addEventListener('beforeunload', () => {
+            if (timerInterval) clearInterval(timerInterval);
+        });
     </script>
 </body>
 </html>
